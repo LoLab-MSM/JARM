@@ -132,8 +132,17 @@ Rule('pMKK4BindArr', Arrestin(b1=None, b2=None, b3=None) + MKK4(b=None, state='P
 Rule('pMKK7BindArr', Arrestin(b1=None, b2=None, b3=None) + MKK7(b=None, state='P') |
      Arrestin(b1=None, b2=2, b3=None) % MKK7(b=2, state='P'), kf_pMKK7_Arr, kr_pMKK7_Arr)
 
-Rule('JNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='U', tyro='U') |
+Rule('uuJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='U', tyro='U') |
      Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='U'), kf_JNK3_Arr, kr_JNK3_Arr)
+
+Rule('upJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='U', tyro='P') |
+     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='P'), kf_upJNK3Arr_MKK4, kr_upJNK3Arr_MKK4)
+
+Rule('puJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='P', tyro='U') |
+     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='P', tyro='U'), kf_puJNK3Arr_MKK7, kr_puJNK3Arr_MKK7)
+
+# Rule('ppJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='P', tyro='P') |
+#      Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='P', tyro='P'), kf_MKK4_ArrBinduuJNK3, kr_MKK4_ArrBinduuJNK3)
 
 Rule('MKK4_ArrBinduuJNK3', Arrestin(b1=None, b2=2, b3=None) % MKK4(b=2, state='P') + JNK3(b=None, threo='U', tyro='U') |
      Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, threo='U', tyro='U'),
@@ -181,11 +190,12 @@ Rule('ppJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P')
 
 # MKK4/7 release from Arrestin complex
 # Does MKK 4/7 bind at a different rate when JNK3 is present? Does it affect if JNK3 is phosphorylated?
-Rule('MKK4DissArr_JNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3) + MKK4(b=None, state='P')|
-      Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3) % MKK4(b=2, state='P'), kf_MKK4BindArr_JNK3, kr_MKK4BindArr_JNK3)
+# We assume that MKK4/7 only binds to the Arr3:JNK3 complex when tyro/threo is unphosphorylated
+Rule('MKK4DissArr_JNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, tyro='U') + MKK4(b=None, state='P')|
+      Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3, tyro='U') % MKK4(b=2, state='P'), kf_MKK4BindArr_JNK3, kr_MKK4BindArr_JNK3)
 
-Rule('MKK7DissArr_JNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3) + MKK7(b=None, state='P')|
-      Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3) % MKK7(b=2, state='P'), kf_MKK7BindArr_JNK3, kr_MKK7BindArr_JNK3)
+Rule('MKK7DissArr_JNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U') + MKK7(b=None, state='P')|
+      Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3, threo='U') % MKK7(b=2, state='P'), kf_MKK7BindArr_JNK3, kr_MKK7BindArr_JNK3)
 
 # EquilibratePMKK4and7
 Rule('EqpMKK4And7', Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, threo='U', tyro='P') + MKK7(b=None, state='P') >>
@@ -222,3 +232,4 @@ Rule('pJNK3_MKK7complex_diss', MKK7(b=1, state='P') % JNK3(b=1, threo='P') |
 # Unbound JNK3
 Observable('pTyr_jnk3', JNK3(b=None, tyro='P'))
 Observable('pThr_jnk3', JNK3(b=None, threo='P'))
+Observable('all_jnk3', JNK3(tyro='P', threo='P'))
