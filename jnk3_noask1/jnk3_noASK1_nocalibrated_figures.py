@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 idx_pars_calibrate = [3, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37,  39, 41]
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-calibrated_pars = np.load('jnk3_noASK1_calibrated_pars7.npy')
+calibrated_pars = np.load('jnk3_noASK1_calibrated_pars6.npy')
 param_values = np.array([p.value for p in model.parameters])
 
 par_set_calibrated = np.copy(param_values)
@@ -18,6 +18,7 @@ tspan = np.linspace(0, 60, 100)
 
 sim1 = ScipyOdeSimulator(model, tspan).run().all
 sim2 = ScipyOdeSimulator(model, tspan, param_values=par_set_calibrated).run().all
+
 
 def plot_trajectories_nocalibrated_model():
     linestyle = 'dashed'
@@ -50,6 +51,7 @@ def plot_trajectories_nocalibrated_model():
 # plt.xlabel('Time(s)')
 # plt.ylabel('Concentration mM')
 # plt.show()
+
 
 def plot_trajectories_calibrated_model():
     linestyle = 'dashed'
@@ -99,7 +101,8 @@ def plot_trajectories_calibrated_model():
     # axarr[5].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     # axarr[6].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 
-    plt.savefig('model_trajectories_calibrated7.pdf', format='pdf', bbox_inches='tight')
+    plt.savefig('model_trajectories_calibrated6.eps', format='eps', bbox_inches='tight')
 
-# plot_trajectories_calibrated_model()
-plot_trajectories_nocalibrated_model()
+
+plot_trajectories_calibrated_model()
+# plot_trajectories_nocalibrated_model()
