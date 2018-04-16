@@ -1,5 +1,4 @@
 from pysb import *
-from pysb.macros import equilibrate
 
 Model()
 
@@ -16,12 +15,12 @@ Monomer('JNK3', ['b', 'threo', 'tyro'], {'threo': ['U', 'P'], 'tyro': ['U', 'P']
 
 # Because the Ordinary differential equations derived from the mass action kinetics law requires rate
 # constants instead of K_D values, K_D values are going to be converted into rate parameters (k_r/k_f).
-# We are going to assume that the reaction k_f is difussion limited, whereas the k_r would be allowed to vary
+# We are going to assume that the reaction rate k_f is 'the average enzyme', whereas the k_r would be allowed to vary
 
 ###### IMPORTANT INFO ABOUT JNK3
 
 # uMKK4 with Arrestin-3, K_D = 23 microM, figure 1.A
-Parameter('kf_uMKK4_Arr', 2) # 1.5e4
+Parameter('kf_uMKK4_Arr', 2)
 Parameter('kr_uMKK4_Arr', 46)
 
 # pMKK4 with Arrestin-3, K_D = 347 microM, figure 1.B
@@ -30,7 +29,7 @@ Parameter('kr_pMKK4_Arr', 176.340346800959)
 
 # uMKK7 with Arrestin-3, K_D = 6.5 microM, figure 1.C
 Parameter('kf_uMKK7_Arr', 2)
-Parameter('kr_uMKK7_Arr', 13) # Experimental value 97500
+Parameter('kr_uMKK7_Arr', 13)
 
 # pMKK7 with Arrestin-3, K_D = 13 microM, figure 1.D
 Parameter('kf_pMKK7_Arr', 2)
@@ -114,10 +113,10 @@ Parameter('kf_pJNK3_MKK7complex', 2)
 Parameter('kr_pJNK3_MKK7complex', 3)
 
 # Initial conditions
-Parameter('Arrestin_0', 20)
-Parameter('pMKK4_0', 0.2)
-Parameter('pMKK7_0', 0.2)
-Parameter('uJNK3_0', 2)
+Parameter('Arrestin_0', 5)
+Parameter('pMKK4_0', 0.05)
+Parameter('pMKK7_0', 0.05)
+Parameter('uJNK3_0', 0.5)
 
 Initial(Arrestin(b1=None, b2=None, b3=None), Arrestin_0)
 Initial(MKK4(b=None, state='P'), pMKK4_0)
@@ -148,7 +147,6 @@ Rule('MKK4_ArrBinduuJNK3', Arrestin(b1=None, b2=2, b3=None) % MKK4(b=2, state='P
      Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, threo='U', tyro='U'),
      kf_MKK4_ArrBinduuJNK3, kr_MKK4_ArrBinduuJNK3)
 
-# Does the state of JNK3 affect the catalysis?
 Rule('MKK4catJNK3Arr', Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, tyro='U') >>
      Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, tyro='P'),kcat_pMKK4_ArrJNK3)
 
@@ -178,7 +176,6 @@ Rule('puJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P')
      Arrestin(b1=None, b2=2, b3=None) % MKK7(b=2, state='P') + JNK3(b=None, threo='P', tyro='U')
      , kr_puJNK3Arr_MKK7, kf_puJNK3Arr_MKK7)
 
-# I am not sure about this rule's rate. Does it change the kinetic rate depending if MKK4 or 7 is bound?
 # Here we assume that the kinetics of puJNK3 disocciation for MKK4 are the same as for MKK7
 Rule('upJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P') % JNK3(b=3, threo='U', tyro='P') |
      Arrestin(b1=None, b2=2, b3=None) % MKK7(b=2, state='P') + JNK3(b=None, threo='U', tyro='P')
@@ -189,7 +186,6 @@ Rule('ppJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P')
      , kr_ppJNK3_Arr, kf_ppJNK3_Arr)
 
 # MKK4/7 release from Arrestin complex
-# Does MKK 4/7 bind at a different rate when JNK3 is present? Does it affect if JNK3 is phosphorylated?
 # We assume that MKK4/7 only binds to the Arr3:JNK3 complex when tyro/threo is unphosphorylated
 Rule('MKK4DissArr_JNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, tyro='U') + MKK4(b=None, state='P')|
       Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3, tyro='U') % MKK4(b=2, state='P'), kf_MKK4BindArr_JNK3, kr_MKK4BindArr_JNK3)
@@ -206,14 +202,16 @@ Rule('EqpMKK7And4', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P') % JNK3(
      Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, threo='P', tyro='U') + MKK7(b=None, state='P'),
      keq_pMKK7_to_pMKK4)
 
-#### Interactions that have to be added in order to the model to fit the experimental data
+#### Direct interactions between MKK4/7 and JNK3
 
 Rule('MKK4BindJNK3', MKK4(b=None, state='P') + JNK3(b=None, tyro='U') |
      MKK4(b=1, state='P') % JNK3(b=1, tyro='U')
      , kf_MKK4_uJNK3, kr_MKK4_uJNK3)
 
+# phosphorylation should be the same with of witouh arrestin as arrestin
+# only organizes spatially the molecules but doesnt enhance the catalysis
 Rule('MKK4catJNK3', MKK4(b=1, state='P') % JNK3(b=1, tyro='U') >>
-     MKK4(b=1, state='P') % JNK3(b=1, tyro='P'),kcat_pMKK4_JNK3)
+     MKK4(b=1, state='P') % JNK3(b=1, tyro='P'),kcat_pMKK4_ArrJNK3)
 
 # JNK3 has to get dissociated because otherwise it wouldnt be possible to have more pJNK3 than the value of MKK4 or MKK7
 Rule('pJNK3_MKK4complex_diss', MKK4(b=1, state='P') % JNK3(b=1, tyro='P') |
@@ -223,13 +221,13 @@ Rule('MKK7BindJNK3', MKK7(b=None, state='P') + JNK3(b=None, threo='U') |
      MKK7(b=1, state='P') % JNK3(b=1, threo='U'), kf_MKK7_uJNK3, kr_MKK7_uJNK3)
 
 Rule('MKK7catJNK3', MKK7(b=1, state='P') % JNK3(b=1, threo='U') >>
-     MKK7(b=1, state='P') % JNK3(b=1, threo='P'), kcat_pMKK7_JNK3)
+     MKK7(b=1, state='P') % JNK3(b=1, threo='P'), kcat_pMKK7_ArrJNK3)
 
 # JNK3 has to get dissociated because otherwise it wouldnt be possible to have more pJNK3 than the value of MKK4 or MKK7
 Rule('pJNK3_MKK7complex_diss', MKK7(b=1, state='P') % JNK3(b=1, threo='P') |
      MKK7(b=None, state='P') + JNK3(b=None, threo='P') , kr_pJNK3_MKK7complex, kf_pJNK3_MKK7complex)
 
-# Unbound JNK3
+# Observables
 Observable('pTyr_jnk3', JNK3(b=None, tyro='P'))
 Observable('pThr_jnk3', JNK3(b=None, threo='P'))
 Observable('all_jnk3', JNK3(tyro='P', threo='P'))
