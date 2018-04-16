@@ -9,9 +9,10 @@ import pandas as pd
 
 # Initialize PySB solver
 
-exp_data = pd.read_csv('../data/exp_data_arrestin_noarrestin.csv')
+exp_data = pd.read_csv('../data/exp_data_arrestin_normalization.csv')
 
-tspan = exp_data['Time (secs)'].values[:-1]
+tspan = np.linspace(0, exp_data['Time (secs)'].values[-2], 121)
+t_exp_mask = [idx in exp_data['Time (secs)'].values[:-1] for idx in tspan]
 solver = ScipyOdeSimulator(model, tspan=tspan)
 
 like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values[:-1] + np.finfo(float).eps,
@@ -27,30 +28,21 @@ like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values[:-1
 
 # Add PySB rate parameters to be sampled as unobserved random variables to DREAM with normal priors
 
-idx_pars_calibrate = [21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37,  39, 41]
+idx_pars_calibrate = [3, 21, 23, 25, 27, 29, 32, 33, 36, 37,  39, 41]
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-# Initial conditions of mkk4, mkk7, uJNK3 respectively
 arrestin_idx = [42]
+jnk3_initial_value = model.parameters[45].value
+
 param_values = np.array([p.value for p in model.parameters])
 
-sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=1.5) for par in param_values[rates_of_interest_mask]]
-
-# kd_ASK1_Arr = SampledParam(norm, loc=np.log10(model.parameters['kr_Ask1_Arr'].value /
-#                                               model.parameters['kf_Ask1_Arr'].value), scale=1.5)
-# kcat_Ask1_Activation = SampledParam(norm, loc=np.log10(model.parameters['kcat_Ask1_Activation'].value), scale=1.5)
-# kf_uMKK4_to_uMKK7 = SampledParam(norm, loc=np.log10(model.parameters['kf_uMKK4_to_uMKK7'].value), scale=1.5)
-# kf_uMKK7_to_uMKK4 = SampledParam(norm, loc=np.log10(model.parameters['kf_uMKK7_to_uMKK4'].value), scale=1.5)
-# kcat_pMKK4_JNK3 = SampledParam(norm, loc=np.log10(model.parameters['kcat_pMKK4_JNK3'].value), scale=1.5)
-# kcat_pMKK7_JNK3 = SampledParam(norm, loc=np.log10(model.parameters['kcat_pMKK7_JNK3'].value), scale=1.5)
-#
-# sampled_parameter_names = [kd_ASK1_Arr, kcat_Ask1_Activation, kf_uMKK4_to_uMKK7, kf_uMKK7_to_uMKK4,
-#                            kcat_pMKK4_JNK3, kcat_pMKK7_JNK3]
+sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for par in param_values[rates_of_interest_mask]]
+# We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
+# for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
+sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(160), scale=np.log10(1068))
 
 nchains = 5
-niterations = 1000
-
-pso_pars = np.load('jnk3_noASK1_calibrated_pars4.npy')
+niterations = 5000
 
 def likelihood(position):
     Y = np.copy(position)
@@ -59,18 +51,31 @@ def likelihood(position):
     pars = np.copy(param_values)
 
     sim = solver.run(param_values=pars).all
-    logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim['pTyr_jnk3']))
-    logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim['pThr_jnk3']))
+    logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value))
+    logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
 
     # No arrestin experiments
     pars[arrestin_idx] = 0
     sim2 = solver.run(param_values=pars).all
 
-    logp_mkk4_noarrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim2['pTyr_jnk3']))
-    logp_mkk7_noarrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim2['pThr_jnk3']))
+    logp_mkk4_noarrestin = np.sum(like_mkk4_noarrestin_pjnk3.logpdf(sim2['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value))
+    logp_mkk7_noarrestin = np.sum(like_mkk7_noarrestin_pjnk3.logpdf(sim2['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
 
-    return logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin + logp_mkk7_noarrestin
+    #If model simulation failed due to integrator errors, return a log probability of -inf.
+    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin + logp_mkk7_noarrestin
+    if np.isnan(logp_total):
+        logp_total = -np.inf
 
+    return logp_total
+
+# We can start the chains from pso calibrated parameters to converge the chains faster
+# pso_pars0 = np.load('jnk3_noASK1_calibrated_pars0.npy')
+# pso_pars2 = np.load('jnk3_noASK1_calibrated_pars2.npy')
+# pso_pars3 = np.load('jnk3_noASK1_calibrated_pars3.npy')
+# pso_pars5 = np.load('jnk3_noASK1_calibrated_pars5.npy')
+# pso_pars6 = np.load('jnk3_noASK1_calibrated_pars6.npy')
+#
+# pso_pars = [pso_pars0, pso_pars2, pso_pars3, pso_pars5, pso_pars6]
 
 if __name__ == '__main__':
 
@@ -84,14 +89,14 @@ if __name__ == '__main__':
 
     # Save sampling output (sampled parameter values and their corresponding logps).
     for chain in range(len(sampled_params)):
-        np.save('jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain)+'_'+str(total_iterations), sampled_params[chain])
-        np.save('jnk3_dreamzs_5chain_logps_chain_' + str(chain)+'_'+str(total_iterations), log_ps[chain])
+        np.save('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain)+'_'+str(total_iterations), sampled_params[chain])
+        np.save('pydream_results/jnk3_dreamzs_5chain_logps_chain_' + str(chain)+'_'+str(total_iterations), log_ps[chain])
 
     #Check convergence and continue sampling if not converged
 
     GR = Gelman_Rubin(sampled_params)
     print('At iteration: ',total_iterations,' GR = ',GR)
-    np.savetxt('jnk3_dreamzs_5chain_GelmanRubin_iteration_'+str(total_iterations)+'.txt', GR)
+    np.savetxt('pydream_results/jnk3_dreamzs_5chain_GelmanRubin_iteration_'+str(total_iterations)+'.txt', GR)
 
     old_samples = sampled_params
     if np.any(GR>1.2):
@@ -106,13 +111,13 @@ if __name__ == '__main__':
 
             # Save sampling output (sampled parameter values and their corresponding logps).
             for chain in range(len(sampled_params)):
-                np.save('jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain)+'_'+str(total_iterations), sampled_params[chain])
-                np.save('jnk3_dreamzs_5chain_logps_chain_' + str(chain)+'_'+str(total_iterations), log_ps[chain])
+                np.save('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_' + str(chain)+'_'+str(total_iterations), sampled_params[chain])
+                np.save('pydream_results/jnk3_dreamzs_5chain_logps_chain_' + str(chain)+'_'+str(total_iterations), log_ps[chain])
 
             old_samples = [np.concatenate((old_samples[chain], sampled_params[chain])) for chain in range(nchains)]
             GR = Gelman_Rubin(old_samples)
             print('At iteration: ',total_iterations,' GR = ',GR)
-            np.savetxt('jnk3_dreamzs_5chain_GelmanRubin_iteration_' + str(total_iterations)+'.txt', GR)
+            np.savetxt('pydream_results/jnk3_dreamzs_5chain_GelmanRubin_iteration_' + str(total_iterations)+'.txt', GR)
 
             if np.all(GR<1.2):
                 converged = True
@@ -131,7 +136,7 @@ if __name__ == '__main__':
         for dim in range(ndims):
             fig = plt.figure()
             sns.distplot(samples[:, dim], color=colors[dim], norm_hist=True)
-            fig.savefig('PyDREAM_jnk3_dimension_'+str(dim))
+            fig.savefig('pydream_results/PyDREAM_jnk3_dimension_'+str(dim))
 
     except ImportError:
         pass
