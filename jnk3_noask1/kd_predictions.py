@@ -4,9 +4,11 @@ import matplotlib.pyplot as plt
 from pysb.simulator import ScipyOdeSimulator
 
 param_values = np.array([p.value for p in model.parameters])
-idx_pars_calibrate = [3, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37,  39, 41]
+# idx_pars_calibrate = [3, 21, 23, 25, 27, 29, 32, 33, 36, 37,  39, 41]
+#New kds in jnk3 mkk4/7
+idx_pars_calibrate = [21, 23, 25, 32, 33, 36, 37]
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
-pars = np.load('jnk3_noASK1_calibrated_pars_new3.npy')
+pars = np.load('jnk3_noASK1_calibrated_pars_pso20_1h.npy')
 param_values[rates_of_interest_mask] = 10 ** pars
 
 mkk4_ic_idx = 43
