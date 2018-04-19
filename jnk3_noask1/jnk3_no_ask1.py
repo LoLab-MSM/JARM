@@ -25,7 +25,7 @@ Parameter('kr_uMKK4_Arr', 46)
 
 # pMKK4 with Arrestin-3, K_D = 347 microM, figure 1.B
 Parameter('kf_pMKK4_Arr', 2)
-Parameter('kr_pMKK4_Arr', 176.340346800959)
+Parameter('kr_pMKK4_Arr', 694)
 
 # uMKK7 with Arrestin-3, K_D = 6.5 microM, figure 1.C
 Parameter('kf_uMKK7_Arr', 2)
@@ -68,24 +68,27 @@ Parameter('kr_JNK3_Arr', 2.8)
 
 ##### These are the parameters that are going to be calibrated
 
+# Interacting JNK-docking Sites in MKK7 Promote Binding and
+# Activation of JNK Mitogen-activated Protein Kinases* kd = 40 microm
 Parameter('kf_MKK4BindArr_JNK3', 2)
-Parameter('kr_MKK4BindArr_JNK3', 2)
+Parameter('kr_MKK4BindArr_JNK3', 80)
 
+# kd = 30
 Parameter('kf_MKK7BindArr_JNK3', 2)
-Parameter('kr_MKK7BindArr_JNK3', 2)
+Parameter('kr_MKK7BindArr_JNK3', 60)
 
 # Arrestin3-MKK7 bind to uuJNK3, K_D = 1.4 microM, Figure 1.E
 Parameter('kf_MKK7_ArrBinduuJNK3', 2)
-Parameter('kr_MKK7_ArrBinduuJNK3', 2.4)
+Parameter('kr_MKK7_ArrBinduuJNK3', 2.8)
 
 # uJNK3 with MKK4
 Parameter('kf_MKK4_uJNK3', 2)
-Parameter('kr_MKK4_uJNK3', 4)
+Parameter('kr_MKK4_uJNK3', 80)
 
 # uJNK3 with MKK7
 # This is when MKK7 is bound
 Parameter('kf_MKK7_uJNK3', 2)
-Parameter('kr_MKK7_uJNK3', 4)
+Parameter('kr_MKK7_uJNK3', 60)
 
 # Equilibration between unphosphorilated MKK4 and 7, these parameters have units of inverse s
 Parameter('keq_uMKK4_to_uMKK7', 10) # 7
@@ -107,21 +110,25 @@ Parameter('keq_pMKK4_to_pMKK7', 1)
 Parameter('keq_pMKK7_to_pMKK4', 1)
 
 Parameter('kf_pJNK3_MKK4complex', 2)
-Parameter('kr_pJNK3_MKK4complex', 3)
+Parameter('kr_pJNK3_MKK4complex', 80)
 
 Parameter('kf_pJNK3_MKK7complex', 2)
-Parameter('kr_pJNK3_MKK7complex', 3)
+Parameter('kr_pJNK3_MKK7complex', 60)
 
 # Initial conditions
 Parameter('Arrestin_0', 5)
 Parameter('pMKK4_0', 0.05)
 Parameter('pMKK7_0', 0.05)
-Parameter('uJNK3_0', 0.5)
+Parameter('uuJNK3_0', 0.468)
+Parameter('puJNK3_0', 0.072)
+Parameter('upJNK3_0', 0.06)
 
 Initial(Arrestin(b1=None, b2=None, b3=None), Arrestin_0)
 Initial(MKK4(b=None, state='P'), pMKK4_0)
 Initial(MKK7(b=None, state='P'), pMKK7_0)
-Initial(JNK3(b=None, threo='U', tyro='U'), uJNK3_0)
+Initial(JNK3(b=None, threo='U', tyro='U'), uuJNK3_0)
+Initial(JNK3(b=None, threo='P', tyro='U'), puJNK3_0)
+Initial(JNK3(b=None, threo='U', tyro='P'), upJNK3_0)
 
 # Rules
 
@@ -228,6 +235,6 @@ Rule('pJNK3_MKK7complex_diss', MKK7(b=1, state='P') % JNK3(b=1, threo='P') |
      MKK7(b=None, state='P') + JNK3(b=None, threo='P') , kr_pJNK3_MKK7complex, kf_pJNK3_MKK7complex)
 
 # Observables
-Observable('pTyr_jnk3', JNK3(b=None, tyro='P'))
-Observable('pThr_jnk3', JNK3(b=None, threo='P'))
+Observable('pTyr_jnk3', JNK3(tyro='P'))
+Observable('pThr_jnk3', JNK3(threo='P'))
 Observable('all_jnk3', JNK3(tyro='P', threo='P'))
