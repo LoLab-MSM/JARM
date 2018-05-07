@@ -4,7 +4,8 @@ channels:
   - anaconda
 dependencies:
 - pysb
-- seborn
+- matplotlib
+- seaborn
 - pip:
   - simplepso
     git+git://github.com/LoLab-VU/PyDREAM@master#egg=pydream
