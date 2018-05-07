@@ -1,4 +1,5 @@
 pysb
 simplepso
-pydream
+git+git://github.com/LoLab-VU/PyDREAM@master#egg=pydream
 matplotlib
+seaborn
