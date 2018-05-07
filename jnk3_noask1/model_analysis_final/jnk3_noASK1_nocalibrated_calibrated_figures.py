@@ -10,7 +10,8 @@ from equilibration_function import pre_equilibration
 idx_pars_calibrate = [1, 15, 17, 19, 24, 25, 26, 27]
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-calibrated_pars = np.load('jnk3_noASK1_calibrated_pars_pso_1h.npy')
+# calibrated_pars = np.load('jnk3_noASK1_calibrated_pars_pso_1h.npy')
+calibrated_pars = np.load('pydream_most_likely_par.npy') # most likely parameter from pydream calibration
 param_values = np.array([p.value for p in model.parameters])
 
 jnk3_initial_idxs = [35, 36, 37]
@@ -148,7 +149,7 @@ def plot_arrestin_noarrestin_ppjnk3():
     plt.xlabel('Time (s)')
     plt.ylabel(r'Concentration [$\mu$M]')
     plt.legend()
-    plt.savefig('plot_arrestin_noarrestin_ppjnk3_test.pdf', format='pdf', bbox_inches='tight')
+    plt.savefig('plot_arrestin_noarrestin_ppjnk3.pdf', format='pdf', bbox_inches='tight')
 
 
 # plot_trajectories_calibrated_model()
