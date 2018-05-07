@@ -1,4 +1,4 @@
-from jnk3_no_ask1_final import model
+from jnk3_no_ask1 import model
 from simplepso.pso import PSO
 from pysb.simulator import ScipyOdeSimulator
 import numpy as np

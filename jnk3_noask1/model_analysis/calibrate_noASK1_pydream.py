@@ -4,7 +4,7 @@ from pysb.simulator import ScipyOdeSimulator
 from pydream.parameters import SampledParam
 from scipy.stats import norm, uniform
 from pydream.convergence import Gelman_Rubin
-from jnk3_no_ask1_final import model
+from jnk3_no_ask1 import model
 import pandas as pd
 from equilibration_function import pre_equilibration
 

@@ -1,7 +1,7 @@
 import seaborn as sns
 import numpy as np
 from matplotlib import pyplot as plt
-from jnk3_no_ask1_final import model
+from jnk3_no_ask1 import model
 
 chain0 = np.load('calibration_normalization_preequilibration/jnk3_dreamzs_5chain_sampled_params_chain_0_50000.npy')
 chain1 = np.load('calibration_normalization_preequilibration/jnk3_dreamzs_5chain_sampled_params_chain_1_50000.npy')

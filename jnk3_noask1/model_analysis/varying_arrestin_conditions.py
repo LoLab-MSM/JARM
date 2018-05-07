@@ -1,5 +1,5 @@
 # coding=utf-8
-from jnk3_no_ask1_final import model
+from jnk3_no_ask1 import model
 import numpy as np
 from pysb.simulator import ScipyOdeSimulator
 import matplotlib.pyplot as plt
