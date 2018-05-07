@@ -1,5 +1,10 @@
 name: jarm
 channels:
   - alubbock
+  - anaconda
 dependencies:
 - pysb
+- seborn
+- pip:
+  - simplepso
+    git+git://github.com/LoLab-VU/PyDREAM@master#egg=pydream
