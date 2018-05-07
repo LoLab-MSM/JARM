@@ -8,4 +8,4 @@ dependencies:
 - seaborn
 - pip:
   - simplepso
-    git+git://github.com/LoLab-VU/PyDREAM@master#egg=pydream
+  - git+git://github.com/LoLab-VU/PyDREAM@master#egg=pydream
