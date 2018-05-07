@@ -1,0 +1,5 @@
+name: jarm
+channels:
+  - c alubbock
+dependencies:
+- pysb
