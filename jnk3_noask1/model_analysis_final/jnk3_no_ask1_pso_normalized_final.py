@@ -50,7 +50,7 @@ def display(position):
     pars_eq2[jnk3_initial_idxs] = [0.492, 0.108, 0]
 
     all_pars = np.stack((pars_eq1, pars_eq2))
-    all_pars[:, [16, 17, 32, 33, 34, 35]] = 0  # Setting catalytic reactions to zero for pre-equilibration
+    all_pars[:, [24, 25]] = 0  # Setting catalytic reactions to zero for pre-equilibration
     eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
