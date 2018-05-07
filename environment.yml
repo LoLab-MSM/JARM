@@ -1,8 +1,5 @@
-- conda install --yes -c conda-forge python="$TRAVIS_PYTHON_VERSION"
-    numpy scipy matplotlib seaborn sympy networkx h5py
-    pandas
-- conda install --yes -c alubbock pysb
-- pip install simplepso pathos
-- pip install git+https://github.com/LoLab-VU/JARM.git
-- mkdir -p ~/.config/matplotlib
-- echo "backend:Agg" > ~/.config/matplotlib/matplotlibrc
+name: jarm
+channels:
+  - alubbock
+dependencies:
+- pysb
