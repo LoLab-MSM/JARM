@@ -6,7 +6,7 @@ dependencies:
 - pysb
 - matplotlib
 - seaborn
+- cython
 - pip:
   - simplepso
   - git+git://github.com/LoLab-VU/PyDREAM@master#egg=pydream
-  - cython
