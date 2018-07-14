@@ -32,12 +32,24 @@ Parameter('kf_MKK4_ArrBinduuJNK3', 2)
 Parameter('kr_MKK4_ArrBinduuJNK3', 2.8)
 
 # Arrestin3-MKK4 bind to upJNK3, K_D = 4.2 microM, figure 1.F
-Parameter('kf_upJNK3Arr_MKK4', 2)
-Parameter('kr_upJNK3Arr_MKK4', 8.4)
+Parameter('kf_upJNK3BindArr', 2)
+Parameter('kr_upJNK3BindArr', 8.4)
+
+Parameter('kf_upJNK3BindArr_MKK4', 2)
+Parameter('kr_upJNK3BindArr_MKK4', 8.4)
+
+Parameter('kf_upJNK3BindArr_MKK7', 2)
+Parameter('kr_upJNK3BindArr_MKK7', 8.4)
 
 # Arrestin3-MKK7 bind to puJNK3, K_D = 10.5 microM, figure 1.G
-Parameter('kf_puJNK3Arr_MKK7', 2)
-Parameter('kr_puJNK3Arr_MKK7', 21)
+Parameter('kf_puJNK3BindArr', 2)
+Parameter('kr_puJNK3BindArr', 21)
+
+Parameter('kf_puJNK3BindArr_MKK4', 2)
+Parameter('kr_puJNK3BindArr_MKK4', 21)
+
+Parameter('kf_puJNK3BindArr_MKK7', 2)
+Parameter('kr_puJNK3BindArr_MKK7', 21)
 
 # # ppJNK3 with Arrestin-3, K_D = 220 microM, figure 1.H
 Parameter('kf_ppJNK3_Arr', 2)
@@ -51,8 +63,11 @@ Parameter('kr_JNK3_Arr', 2.8)
 
 # Interacting JNK-docking Sites in MKK7 Promote Binding and
 # Activation of JNK Mitogen-activated Protein Kinases* kd = 40 microm
-Parameter('kf_MKK4BindArr_JNK3', 2)
-Parameter('kr_MKK4BindArr_JNK3', 80)
+Parameter('kf_MKK4BindArr_uuJNK3', 2)
+Parameter('kr_MKK4BindArr_uuJNK3', 80)
+
+Parameter('kf_MKK4BindArr_puJNK3', 2)
+Parameter('kr_MKK4BindArr_puJNK3', 80)
 
 # kd = 30
 Parameter('kf_MKK7BindArr_JNK3', 2)
@@ -90,9 +105,9 @@ Parameter('kr_pJNK3_MKK7complex', 60)
 Parameter('Arrestin_0', 5)
 Parameter('pMKK4_0', 0.05)
 Parameter('pMKK7_0', 0.05)
-Parameter('uuJNK3_0', 0.468)
-Parameter('puJNK3_0', 0.072)
-Parameter('upJNK3_0', 0.06)
+Parameter('uuJNK3_0', 0.43398)
+Parameter('puJNK3_0', 0.162)
+Parameter('upJNK3_0', 0.00402)
 
 Initial(Arrestin(b1=None, b2=None, b3=None), Arrestin_0)
 Initial(MKK4(b=None, state='P'), pMKK4_0)
@@ -113,10 +128,10 @@ Rule('uuJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='
      Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='U'), kf_JNK3_Arr, kr_JNK3_Arr)
 
 Rule('upJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='U', tyro='P') |
-     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='P'), kf_upJNK3Arr_MKK4, kr_upJNK3Arr_MKK4)
+     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='P'), kf_upJNK3BindArr, kr_upJNK3BindArr)
 
 Rule('puJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='P', tyro='U') |
-     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='P', tyro='U'), kf_puJNK3Arr_MKK7, kr_puJNK3Arr_MKK7)
+     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='P', tyro='U'), kf_puJNK3BindArr, kr_puJNK3BindArr)
 
 # Rule('ppJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='P', tyro='P') |
 #      Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='P', tyro='P'), kf_MKK4_ArrBinduuJNK3, kr_MKK4_ArrBinduuJNK3)
@@ -131,12 +146,12 @@ Rule('MKK4catJNK3Arr', Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JN
 # JNK3 has to get dissociated because otherwise it wouldnt be possible to have more pJNK3 than the value of MKK4 or MKK7
 Rule('upJNK3Arr_MKK4_diss', Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3,threo='U', tyro='P') |
      Arrestin(b1=None, b2=2, b3=None) % MKK4(b=2, state='P') + JNK3(b=None, threo='U', tyro='P')
-     , kr_upJNK3Arr_MKK4, kf_upJNK3Arr_MKK4)
+     , kr_upJNK3BindArr_MKK4, kf_upJNK3BindArr_MKK4)
 
 # Here we assume that the kinetics of puJNK3 disocciation for MKK4 are the same as for MKK7
 Rule('puJNK3Arr_MKK4_diss', Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, threo='P', tyro='U') |
      Arrestin(b1=None, b2=2, b3=None) % MKK4(b=2, state='P') + JNK3(b=None, threo='P', tyro='U')
-     , kr_puJNK3Arr_MKK7, kf_puJNK3Arr_MKK7)
+     , kr_puJNK3BindArr_MKK4, kf_puJNK3BindArr_MKK4)
 
 Rule('ppJNK3Arr_MKK4_diss', Arrestin(b1=None, b2=2, b3=3) % MKK4(b=2, state='P') % JNK3(b=3, threo='P', tyro='P') |
      Arrestin(b1=None, b2=2, b3=None) % MKK4(b=2, state='P') + JNK3(b=None, threo='P', tyro='P')
@@ -152,12 +167,12 @@ Rule('MKK7catJNK3Arr', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P') % JN
 # JNK3 has to get dissociated because otherwise it wouldnt be possible to have more pJNK3 than the value of MKK4 or MKK7
 Rule('puJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P') % JNK3(b=3, threo='P', tyro='U') |
      Arrestin(b1=None, b2=2, b3=None) % MKK7(b=2, state='P') + JNK3(b=None, threo='P', tyro='U')
-     , kr_puJNK3Arr_MKK7, kf_puJNK3Arr_MKK7)
+     , kr_puJNK3BindArr_MKK7, kf_puJNK3BindArr_MKK7)
 
 # Here we assume that the kinetics of puJNK3 disocciation for MKK4 are the same as for MKK7
 Rule('upJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P') % JNK3(b=3, threo='U', tyro='P') |
      Arrestin(b1=None, b2=2, b3=None) % MKK7(b=2, state='P') + JNK3(b=None, threo='U', tyro='P')
-     , kr_upJNK3Arr_MKK4, kf_upJNK3Arr_MKK4)
+     , kr_upJNK3BindArr_MKK7, kf_upJNK3BindArr_MKK7)
 
 Rule('ppJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P') % JNK3(b=3, threo='P', tyro='P') |
      Arrestin(b1=None, b2=2, b3=None) % MKK7(b=2, state='P') + JNK3(b=None, threo='P', tyro='P')
@@ -165,8 +180,11 @@ Rule('ppJNK3Arr_MKK7_diss', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P')
 
 # MKK4/7 release from Arrestin complex
 # We assume that MKK4/7 only binds to the Arr3:JNK3 complex when tyro/threo is unphosphorylated
-Rule('MKK4DissArr_JNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, tyro='U') + MKK4(b=None, state='P')|
-      Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3, tyro='U') % MKK4(b=2, state='P'), kf_MKK4BindArr_JNK3, kr_MKK4BindArr_JNK3)
+Rule('MKK4DissArr_uuJNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='U') + MKK4(b=None, state='P')|
+      Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3, threo='U', tyro='U') % MKK4(b=2, state='P'), kf_MKK4BindArr_uuJNK3, kr_MKK4BindArr_uuJNK3)
+
+Rule('MKK4DissArr_puJNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='P', tyro='U') + MKK4(b=None, state='P')|
+      Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3, threo='P', tyro='U') % MKK4(b=2, state='P'), kf_MKK4BindArr_puJNK3, kr_MKK4BindArr_puJNK3)
 
 Rule('MKK7DissArr_JNK3', Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U') + MKK7(b=None, state='P')|
       Arrestin(b1=None, b2=2, b3=3) % JNK3(b=3, threo='U') % MKK7(b=2, state='P'), kf_MKK7BindArr_JNK3, kr_MKK7BindArr_JNK3)
@@ -203,7 +221,7 @@ Rule('MKK7catJNK3', MKK7(b=1, state='P') % JNK3(b=1, threo='U') >>
 
 # JNK3 has to get dissociated because otherwise it wouldnt be possible to have more pJNK3 than the value of MKK4 or MKK7
 Rule('pJNK3_MKK7complex_diss', MKK7(b=1, state='P') % JNK3(b=1, threo='P') |
-     MKK7(b=None, state='P') + JNK3(b=None, threo='P') , kr_pJNK3_MKK7complex, kf_pJNK3_MKK7complex)
+     MKK7(b=None, state='P') + JNK3(b=None, threo='P'), kr_pJNK3_MKK7complex, kf_pJNK3_MKK7complex)
 
 # Observables
 Observable('pTyr_jnk3', JNK3(tyro='P'))
