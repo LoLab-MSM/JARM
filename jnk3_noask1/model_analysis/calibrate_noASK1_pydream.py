@@ -10,12 +10,15 @@ from equilibration_function import pre_equilibration
 
 # Initialize PySB solver
 
-exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv')
+# exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv')
+exp_data = pd.read_csv('../../data/exp_data_3min.csv')
 
-ignore = 1
+ignore = 0
 
-tspan = np.linspace(0, exp_data['Time (secs)'].values[-(ignore+1)], 121)
-t_exp_mask = [idx in exp_data['Time (secs)'].values[:-1] for idx in tspan]
+tspan = np.linspace(0, exp_data['Time (secs)'].values[-(ignore+1)], 181)
+ignore = -len(exp_data['Time (secs)'].values)
+t_exp_mask = [idx in exp_data['Time (secs)'].values[:] for idx in tspan]
+
 solver = ScipyOdeSimulator(model, tspan=tspan)
 
 like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values[:-ignore] + np.finfo(float).eps,
@@ -32,12 +35,13 @@ like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values[:-i
 # Add PySB rate parameters to be sampled as unobserved random variables to DREAM with normal priors
 
 #New kds in jnk3 mkk4/7
-idx_pars_calibrate = [1, 15, 17, 19, 24, 25, 26, 27]
+idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 29, 31, 33, 34, 35, 36, 37, 39, 41]
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-arrestin_idx = [32]
+arrestin_idx = [42]
 jnk3_initial_value = 0.6
-jnk3_initial_idxs = [35, 36, 37]
+jnk3_initial_idxs = [45, 46, 47]
+kcat_idx = [34, 35]
 
 param_values = np.array([p.value for p in model.parameters])
 
@@ -47,7 +51,7 @@ sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for pa
 sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(160), scale=np.log10(1068)-np.log10(160))
 
 nchains = 5
-niterations = 50000
+niterations = 100000
 
 
 def likelihood(position):
@@ -57,20 +61,24 @@ def likelihood(position):
     pars1 = np.copy(param_values)
     pars2 = np.copy(param_values)
     # Pre-equilibration
-    time_eq = np.linspace(0, 30, 30)
+    time_eq = np.linspace(0, 100, 100)
     pars_eq1 = np.copy(param_values)
     pars_eq2 = np.copy(param_values)
 
     pars_eq2[arrestin_idx] = 0
-    pars_eq2[jnk3_initial_idxs] = [0.492, 0.108, 0]
+    pars_eq2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
 
     all_pars = np.stack((pars_eq1, pars_eq2))
-    all_pars[:, [24, 25]] = 0  # Setting catalytic reactions to zero for pre-equilibration
-    eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
+    all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
+    try:
+        eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
+    except:
+        logp_total = -np.inf
+        return logp_total
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
     pars2[arrestin_idx] = 0
-    pars2[jnk3_initial_idxs] = [0.492, 0.108, 0]
+    pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
     logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value))
     logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim[0]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
@@ -104,7 +112,7 @@ if __name__ == '__main__':
     sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood,
                                        niterations=niterations, nchains=nchains, multitry=False,
                                        gamma_levels=4, adapt_gamma=True, history_thin=1,
-                                       model_name='jnk3_dreamzs_5chain', verbose=True)
+                                       model_name='jnk3_dreamzs_5chain', verbose=False)
 
     # Save sampling output (sampled parameter values and their corresponding logps).
     for chain in range(len(sampled_params)):
