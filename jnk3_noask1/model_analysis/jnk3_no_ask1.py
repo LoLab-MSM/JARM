@@ -78,13 +78,19 @@ Parameter('kf_MKK7_ArrBinduuJNK3', 2)
 Parameter('kr_MKK7_ArrBinduuJNK3', 2.8)
 
 # uJNK3 with MKK4
-Parameter('kf_MKK4_uJNK3', 2)
-Parameter('kr_MKK4_uJNK3', 80)
+Parameter('kf_MKK4_uuJNK3', 2)
+Parameter('kr_MKK4_uuJNK3', 80)
+
+Parameter('kf_MKK4_puJNK3', 2)
+Parameter('kr_MKK4_puJNK3', 80)
 
 # uJNK3 with MKK7
 # This is when MKK7 is bound
-Parameter('kf_MKK7_uJNK3', 2)
-Parameter('kr_MKK7_uJNK3', 60)
+Parameter('kf_MKK7_uuJNK3', 2)
+Parameter('kr_MKK7_uuJNK3', 60)
+
+Parameter('kf_MKK7_upJNK3', 2)
+Parameter('kr_MKK7_upJNK3', 60)
 
 # MKK4, Arrestin JNK3 activation
 Parameter('kcat_pMKK4_ArrJNK3', 1)
@@ -200,9 +206,13 @@ Rule('EqpMKK7And4', Arrestin(b1=None, b2=2, b3=3) % MKK7(b=2, state='P') % JNK3(
 
 #### Direct interactions between MKK4/7 and JNK3
 
-Rule('MKK4BindJNK3', MKK4(b=None, state='P') + JNK3(b=None, tyro='U') |
-     MKK4(b=1, state='P') % JNK3(b=1, tyro='U')
-     , kf_MKK4_uJNK3, kr_MKK4_uJNK3)
+Rule('MKK4BinduuJNK3', MKK4(b=None, state='P') + JNK3(b=None, threo='U', tyro='U') |
+     MKK4(b=1, state='P') % JNK3(b=1, threo='U', tyro='U')
+     , kf_MKK4_uuJNK3, kr_MKK4_uuJNK3)
+
+Rule('MKK4BindpuJNK3', MKK4(b=None, state='P') + JNK3(b=None, threo='P', tyro='U') |
+     MKK4(b=1, state='P') % JNK3(b=1, threo='P', tyro='U')
+     , kf_MKK4_puJNK3, kr_MKK4_puJNK3)
 
 # phosphorylation should be the same with of witouh arrestin as arrestin
 # only organizes spatially the molecules but doesnt enhance the catalysis
@@ -213,8 +223,11 @@ Rule('MKK4catJNK3', MKK4(b=1, state='P') % JNK3(b=1, tyro='U') >>
 Rule('pJNK3_MKK4complex_diss', MKK4(b=1, state='P') % JNK3(b=1, tyro='P') |
      MKK4(b=None, state='P') + JNK3(b=None, tyro='P'), kr_pJNK3_MKK4complex, kf_pJNK3_MKK4complex)
 
-Rule('MKK7BindJNK3', MKK7(b=None, state='P') + JNK3(b=None, threo='U') |
-     MKK7(b=1, state='P') % JNK3(b=1, threo='U'), kf_MKK7_uJNK3, kr_MKK7_uJNK3)
+Rule('MKK7BinduuJNK3', MKK7(b=None, state='P') + JNK3(b=None, threo='U', tyro='U') |
+     MKK7(b=1, state='P') % JNK3(b=1, threo='U', tyro='U'), kf_MKK7_uuJNK3, kr_MKK7_uuJNK3)
+
+Rule('MKK7BindupJNK3', MKK7(b=None, state='P') + JNK3(b=None, threo='U', tyro='P') |
+     MKK7(b=1, state='P') % JNK3(b=1, threo='U', tyro='P'), kf_MKK7_upJNK3, kr_MKK7_upJNK3)
 
 Rule('MKK7catJNK3', MKK7(b=1, state='P') % JNK3(b=1, threo='U') >>
      MKK7(b=1, state='P') % JNK3(b=1, threo='P'), kcat_pMKK7_ArrJNK3)
