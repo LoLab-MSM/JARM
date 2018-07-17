@@ -15,3 +15,4 @@ u, indices, counts = np.unique(samples, return_index=True, return_counts=True, a
 
 max_idx = np.argmax(counts)
 
+np.save('pydream_most_likely_100000.npy', u[max_idx])
