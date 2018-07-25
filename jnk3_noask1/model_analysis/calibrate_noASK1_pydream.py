@@ -35,15 +35,16 @@ like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values[:-i
 # Add PySB rate parameters to be sampled as unobserved random variables to DREAM with normal priors
 
 ## New kds in jnk3 mkk4/7
-idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 29, 33, 37, 38, 39, 40, 41, 43, 45]
+idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43]
 
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
 # Index of Initial conditions of Arrestin
-arrestin_idx = [46]
+arrestin_idx = [44]
 jnk3_initial_value = 0.6  # total jnk3
-jnk3_initial_idxs = [49, 50, 51]
-kcat_idx = [38, 39]
+jnk3_initial_idxs = [47, 48, 49]
+kcat_idx = [36, 37]
+
 
 param_values = np.array([p.value for p in model.parameters])
 
@@ -98,13 +99,13 @@ def likelihood(position):
     return logp_total
 
 # We can start the chains from pso calibrated parameters to converge the chains faster
-pso_pars1 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_1.npy')
-pso_pars2 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_2.npy')
-pso_pars3 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_3.npy')
-pso_pars4 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_4.npy')
-pso_pars5 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_5.npy')
-
-pso_pars = [pso_pars1, pso_pars2, pso_pars3, pso_pars4, pso_pars5]
+# pso_pars1 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_1.npy')
+# pso_pars2 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_2.npy')
+# pso_pars3 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_3.npy')
+# pso_pars4 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_4.npy')
+# pso_pars5 = np.load('jnk3_noASK1_calibrated_pars_pso_3min_5.npy')
+#
+# pso_pars = [pso_pars1, pso_pars2, pso_pars3, pso_pars4, pso_pars5]
 
 if __name__ == '__main__':
 
@@ -112,7 +113,7 @@ if __name__ == '__main__':
     converged = False
     total_iterations = niterations
     sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood,
-                                       niterations=niterations, nchains=nchains, multitry=False, start=pso_pars,
+                                       niterations=niterations, nchains=nchains, multitry=False,
                                        gamma_levels=4, adapt_gamma=True, history_thin=1,
                                        model_name='jnk3_dreamzs_5chain', verbose=True)
 

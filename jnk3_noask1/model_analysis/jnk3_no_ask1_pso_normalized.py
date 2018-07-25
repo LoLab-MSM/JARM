@@ -11,15 +11,15 @@ exp_data = pd.read_csv('../../data/exp_data_3min.csv') # [0,1] range normalizati
 
 
 ## New kds in jnk3 mkk4/7
-idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 29, 33, 37, 38, 39, 40, 41, 43, 45]
+idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43]
 
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
 # Index of Initial conditions of Arrestin
-arrestin_idx = [46]
+arrestin_idx = [44]
 jnk3_initial_value = 0.6  # total jnk3
-jnk3_initial_idxs = [49, 50, 51]
-kcat_idx = [38, 39]
+jnk3_initial_idxs = [47, 48, 49]
+kcat_idx = [36, 37]
 
 param_values = np.array([p.value for p in model.parameters])
 nominal_values = np.array([p.value for p in model.parameters])
@@ -107,7 +107,7 @@ def likelihood(position):
     pars2 = np.copy(param_values)
 
     # Pre-equilibration
-    time_eq = np.linspace(0, 100, 100)
+    time_eq = np.linspace(0, 30, 60)
     pars_eq1 = np.copy(param_values)
     pars_eq2 = np.copy(param_values)
 
