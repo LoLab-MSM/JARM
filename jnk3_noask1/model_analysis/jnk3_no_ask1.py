@@ -21,7 +21,7 @@ Monomer('JNK3', ['b', 'threo', 'tyro'], {'threo': ['U', 'P'], 'tyro': ['U', 'P']
 
 # pMKK4 with Arrestin-3, K_D = 347 microM, figure 1.B
 Parameter('kf_pMKK4_Arr', 2)
-Parameter('kr_pMKK4_Arr', 694)
+Parameter('kr_pMKK4_Arr', 240)
 
 # pMKK7 with Arrestin-3, K_D = 13 microM, figure 1.D
 Parameter('kf_pMKK7_Arr', 2)
@@ -31,9 +31,9 @@ Parameter('kr_pMKK7_Arr', 26)
 Parameter('kf_MKK4_Arr_bind_uuJNK3', 2)
 Parameter('kr_MKK4_Arr_bind_uuJNK3', 2.8)
 
-# Arrestin3-MKK4 bind to upJNK3, K_D = 4.2 microM, figure 1.F
+# Arrestin3 bind to upJNK3, K_D = 4.2 microM, figure 1.F
 Parameter('kf_upJNK3BindArr', 2)
-Parameter('kr_upJNK3BindArr', 8.4)
+Parameter('kr_upJNK3BindArr', 20)
 
 Parameter('kf_upJNK3_bind_Arr_MKK4', 2)
 Parameter('kr_upJNK3_bind_Arr_MKK4', 8.4)
@@ -41,9 +41,9 @@ Parameter('kr_upJNK3_bind_Arr_MKK4', 8.4)
 Parameter('kf_upJNK3_bind_Arr_MKK7', 2)
 Parameter('kr_upJNK3_bind_Arr_MKK7', 8.4)
 
-# Arrestin3-MKK7 bind to puJNK3, K_D = 10.5 microM, figure 1.G
+# Arrestin3 bind to puJNK3, K_D = 10.5 microM, figure 1.G
 Parameter('kf_puJNK3BindArr', 2)
-Parameter('kr_puJNK3BindArr', 21)
+Parameter('kr_puJNK3BindArr', 20)
 
 Parameter('kf_puJNK3_bind_Arr_MKK4', 2)
 Parameter('kr_puJNK3_bind_Arr_MKK4', 21)
@@ -53,11 +53,11 @@ Parameter('kr_puJNK3_bind_Arr_MKK7', 21)
 
 # # ppJNK3 with Arrestin-3, K_D = 220 microM, figure 1.H
 Parameter('kf_ppJNK3_Arr', 2)
-Parameter('kr_ppJNK3_Arr', 440)
+Parameter('kr_ppJNK3_Arr', 38.4)
 
 # uuJNK3 binds Arrestin, K_D = 1.4 microM, figure 1.E
-Parameter('kf_JNK3_Arr', 2)
-Parameter('kr_JNK3_Arr', 2.8)
+Parameter('kf_uuJNK3_Arr', 2)
+Parameter('kr_uuJNK3_Arr', 2.2)
 
 ##### These are the parameters that are going to be calibrated
 
@@ -133,7 +133,7 @@ Rule('pMKK7BindArr', Arrestin(b1=None, b2=None, b3=None) + MKK7(b=None, state='P
      Arrestin(b1=None, b2=2, b3=None) % MKK7(b=2, state='P'), kf_pMKK7_Arr, kr_pMKK7_Arr)
 
 Rule('uuJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='U', tyro='U') |
-     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='U'), kf_JNK3_Arr, kr_JNK3_Arr)
+     Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='U'), kf_uuJNK3_Arr, kr_uuJNK3_Arr)
 
 Rule('upJNK3BindArr', Arrestin(b1=None, b2=None, b3=None) + JNK3(b=None, threo='U', tyro='P') |
      Arrestin(b1=None, b2=None, b3=3) % JNK3(b=3, threo='U', tyro='P'), kf_upJNK3BindArr, kr_upJNK3BindArr)
