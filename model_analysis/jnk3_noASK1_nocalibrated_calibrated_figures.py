@@ -7,19 +7,21 @@ import matplotlib.pyplot as plt
 from equilibration_function import pre_equilibration
 import sympy
 from collections import OrderedDict
+import pandas as pd
 
 #New kds in jnk3 mkk4/7
-idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream
+# idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream
 # idx_pars_calibrate = [5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream2
-# idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
+idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
 # calibrated_pars = np.load('jnk3_noASK1_calibrated_pars_pso_1h.npy')
-calibrated_pars = np.load('most_likely_par_100000_1.npy') # most likely parameter from pydream calibration
+calibrated_pars = np.load('most_likely_par_100000_3.npy') # most likely parameter from pydream calibration
 param_values = np.array([p.value for p in model.parameters])
 
 jnk3_initial_idxs = [47, 48, 49]
 arrestin_idx = 44
+kcat_idx = [36, 37]
 
 par_set_calibrated = np.copy(param_values)
 par_set_calibrated[rates_of_interest_mask] = 10 ** calibrated_pars
@@ -131,40 +133,40 @@ def plot_trajectories_calibrated_model():
 
 def plot_arrestin_noarrestin_ppjnk3():
     # Pre-equilibration
+    exp_data = pd.read_csv('../data/exp_data_3min.csv')
+    tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 121)
+    solver = ScipyOdeSimulator(model, tspan=tspan)
+
+    pars1 = np.copy(par_set_calibrated)
+    pars2 = np.copy(par_set_calibrated)
+
+    # Pre-equilibration
     time_eq = np.linspace(0, 100, 100)
-    pars_eq = np.copy(par_set_calibrated)
-    pars_eq[[36, 37]] = 0  # Setting catalytic reactions to zero for pre-equilibration
-    eq_conc1 = pre_equilibration(model, time_eq, pars_eq)[1]
-    tspan = np.linspace(0, 60, 100)
-    sim2 = ScipyOdeSimulator(model, tspan, param_values=par_set_calibrated, initials=eq_conc1).run().all
+    pars_eq1 = np.copy(par_set_calibrated)
+    pars_eq2 = np.copy(par_set_calibrated)
 
-    # No arrestin experiments
-    # Pre equilibration
-    pars_eq[arrestin_idx] = 0
-    pars_eq[jnk3_initial_idxs] = [0.492, 0.108, 0]
-    eq_conc2 = pre_equilibration(model, time_eq, pars_eq)[1]
+    pars_eq2[arrestin_idx] = 0
+    pars_eq2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
 
-    par_set_calibrated[arrestin_idx] = 0
-    par_set_calibrated[jnk3_initial_idxs] = [0.492, 0.108, 0]
-    sim3 = ScipyOdeSimulator(model, tspan, param_values=par_set_calibrated, initials=eq_conc2).run().all
+    all_pars = np.stack((pars_eq1, pars_eq2))
+    all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
+    eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
 
-    rate_arr3 = np.diff(sim2['pTyr_jnk3']) / np.diff(tspan)
-    rate_noarr3 = np.diff(sim3['pTyr_jnk3']) / np.diff(tspan)
+    # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
+    pars2[arrestin_idx] = 0
+    pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
+    sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
 
-    arr3_idx = np.argmax(rate_arr3)
-    no_arr3_idx = np.argmax(rate_noarr3)
-    # print (rate_arr3)
-    # print (rate_noarr3)
-    # print ('arr3', np.argmax(rate_arr3), tspan[arr3_idx])
-    # print ('no_arr3', max(rate_noarr3), tspan[no_arr3_idx])
-    print (sim2['pTyr_jnk3'][-1], sim3['pTyr_jnk3'][-1])
 
-    plt.plot(tspan, sim2['all_jnk3'], color='r', label='ppJNK3 with Arrestin-3')
-    plt.plot(tspan, sim3['all_jnk3'], color='k', label='ppJNK3 no Arrestin-3')
+    print ((sim[0]['all_jnk3'][-1] ) / (sim[1]['all_jnk3'][-1] ))
+    print (sim[0]['all_jnk3'][-1] , sim[1]['all_jnk3'][-1] )
+
+    plt.plot(tspan, sim[0]['all_jnk3'], color='r', label='ppJNK3 with Arrestin-3')
+    plt.plot(tspan, sim[1]['all_jnk3'], color='k', label='ppJNK3 no Arrestin-3')
     plt.xlabel('Time (s)')
-    plt.ylabel(r'Concentration [$\mu$M]')
+    plt.ylabel(r' Normalized Concentration')
     plt.legend()
-    plt.savefig('arrestin_noarrestin_ppjnk3_1.pdf', format='pdf', bbox_inches='tight')
+    plt.savefig('arrestin_noarrestin_ppjnk3_3.pdf', format='pdf', bbox_inches='tight')
 
 def plot_uujnk3_production():
     ## This function requires a model observables of the single phosphorylated jnk3 only upjnk3, pujnk3

@@ -21,7 +21,7 @@ fitted_pars = np.load('most_likely_par_100000_3.npy')
 # param_values[rates_of_interest_mask] = 10 ** fitted_pars
 
 # exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv')
-exp_data = pd.read_csv('../../data/exp_data_3min.csv')
+exp_data = pd.read_csv('../data/exp_data_3min.csv')
 
 ignore = 0
 
@@ -58,7 +58,7 @@ def display_sim_data(position):
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
     pars2[arrestin_idx] = 0
-    pars2[jnk3_initial_idxs] = [0.492, 0.108, 0]
+    pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
 
     colors = ['#000000', '#E69F00', '#CC79A7', '#009E73', '#0072B2', '#D55E00']
