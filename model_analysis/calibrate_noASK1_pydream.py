@@ -53,7 +53,8 @@ param_values = np.array([p.value for p in model.parameters])
 sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for par in param_values[rates_of_interest_mask]]
 # We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
 # for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
-sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(160), scale=np.log10(1068)-np.log10(160))
+sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.log10(1200)-np.log10(120))
+sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(38.4), scale=np.log10(384)-np.log10(38.4))
 
 nchains = 5
 niterations = 100000
