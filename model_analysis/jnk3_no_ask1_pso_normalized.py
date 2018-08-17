@@ -153,7 +153,7 @@ def run_example():
     pso.set_speed(-.25, .25)
     pso.run(25, 100)
     display(pso.best)
-    np.save('jnk3_noASK1_calibrated_pars_pso_3min_5', pso.best)
+    np.save('calibrated_pars_pso5', pso.best)
 
 
 def run_example_multiple():

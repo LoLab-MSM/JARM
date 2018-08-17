@@ -16,7 +16,7 @@ idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
 # calibrated_pars = np.load('jnk3_noASK1_calibrated_pars_pso_1h.npy')
-calibrated_pars = np.load('most_likely_par_100000_3.npy') # most likely parameter from pydream calibration
+calibrated_pars = np.load('most_likely_par_100000_2.npy') # most likely parameter from pydream calibration
 param_values = np.array([p.value for p in model.parameters])
 
 jnk3_initial_idxs = [47, 48, 49]
@@ -166,7 +166,7 @@ def plot_arrestin_noarrestin_ppjnk3():
     plt.xlabel('Time (s)')
     plt.ylabel(r' Normalized Concentration')
     plt.legend()
-    plt.savefig('arrestin_noarrestin_ppjnk3_3.pdf', format='pdf', bbox_inches='tight')
+    plt.savefig('arrestin_noarrestin_ppjnk3_2.pdf', format='pdf', bbox_inches='tight')
 
 def plot_uujnk3_production():
     ## This function requires a model observables of the single phosphorylated jnk3 only upjnk3, pujnk3
@@ -178,7 +178,7 @@ def plot_uujnk3_production():
     tspan = np.linspace(0, 60, 100)
     sim2 = ScipyOdeSimulator(model, tspan, param_values=par_set_calibrated, initials=eq_conc1).run().all
 
-    fig, axes = plt.subplots(nrows=3, sharex=True, figsize=(8, 6))
+    fig, axes = plt.subplots(nrows=3, sharex=True, figsize=(6, 6))
     fig.subplots_adjust(hspace=0.5)
     axes[0].set_title('JNK3 activation')
     axes[0].plot(tspan, sim2['all_jnk3'], color="#999999", label='ppJNK3')
@@ -186,22 +186,22 @@ def plot_uujnk3_production():
     axes[0].plot(tspan, sim2['pTyr_jnk3'] - sim2['__s5'], color="#56B4E9", label='pTyr-JNK3:Arrestin-3')
     axes[0].set_ylabel(r'Concentration [$\mu$M]', fontsize=12)
     # plt.xlim(0, tspan[-1])
-    axes[0].legend(loc=0, frameon=False)
+
 
     par_name_idx = {j.name: i for i, j in enumerate(model.parameters)}
 
     # Selecting the reactions in which doubly phosphorylated JNK3 is involved
     rxns_pjnk3 = OrderedDict()
-    rxns_pjnk3['mkk4 first -Arr'] = model.reactions_bidirectional[21]['rate']
-    rxns_pjnk3['mkk7 first -Arr'] = model.reactions_bidirectional[23]['rate']
-    rxns_pjnk3['mkk4 first Arr'] = model.reactions_bidirectional[25]['rate']
-    rxns_pjnk3['mkk7 first Arr'] = model.reactions_bidirectional[27]['rate']
+    rxns_pjnk3['mkk4 catalysis -Arr'] = model.reactions_bidirectional[21]['rate']
+    rxns_pjnk3['mkk7 catalysis -Arr'] = model.reactions_bidirectional[23]['rate']
+    rxns_pjnk3['mkk4 catalysis Arr'] = model.reactions_bidirectional[25]['rate']
+    rxns_pjnk3['mkk7 catalysis Arr'] = model.reactions_bidirectional[27]['rate']
 
     rxns_ppjnk3 = OrderedDict()
-    rxns_ppjnk3['mkk4 sec -Arr'] = model.reactions_bidirectional[22]['rate']
-    rxns_ppjnk3['mkk7 sec -Arr'] = model.reactions_bidirectional[24]['rate']
-    rxns_ppjnk3['mkk4 sec Arr'] = model.reactions_bidirectional[26]['rate']
-    rxns_ppjnk3['mkk7 sec Arr'] = model.reactions_bidirectional[28]['rate']
+    rxns_ppjnk3['mkk4 catalysis -Arr'] = model.reactions_bidirectional[22]['rate']
+    rxns_ppjnk3['mkk7 catalysis -Arr'] = model.reactions_bidirectional[24]['rate']
+    rxns_ppjnk3['mkk4 catalysis Arr'] = model.reactions_bidirectional[26]['rate']
+    rxns_ppjnk3['mkk7 catalysis Arr'] = model.reactions_bidirectional[28]['rate']
 
     colors = ["#009E73", "#0072B2", "#D55E00", "#CC79A7"]
 
@@ -246,11 +246,21 @@ def plot_uujnk3_production():
         axes[2].semilogy(tspan, mon_values, label=label, color=colors[counter])
         counter += 1
     axes[2].set_title('JNK3 second phosphorylation reactions')
-    axes[2].legend(loc=0, ncol=2, frameon=False)
     axes[2].set_ylabel(r'Rate [$\mu$M/s]', fontsize=12)
     axes[2].set_xlabel('Time(s)', fontsize=14)
 
-    plt.savefig('ppjnk3_production_3.pdf', format='pdf', bbox_inches='tight')
+    box0 = axes[0].get_position()
+    box1 = axes[1].get_position()
+    box2 = axes[2].get_position()
+    axes[0].set_position([box0.x0, box0.y0, box0.width * 0.8, box0.height])
+    axes[1].set_position([box1.x0, box1.y0, box1.width * 0.8, box1.height])
+    axes[2].set_position([box2.x0, box2.y0, box2.width * 0.8, box2.height])
+
+    axes[0].legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+    axes[2].legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+
+
+    plt.savefig('ppjnk3_production_2.pdf', format='pdf', bbox_inches='tight')
 
 
 

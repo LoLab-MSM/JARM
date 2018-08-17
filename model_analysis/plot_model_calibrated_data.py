@@ -17,7 +17,7 @@ param_values = np.array([p.value for p in model.parameters])
 idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-fitted_pars = np.load('most_likely_par_100000_3.npy')
+fitted_pars = np.load('most_likely_par_100000_2.npy')
 # param_values[rates_of_interest_mask] = 10 ** fitted_pars
 
 # exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv')
@@ -63,40 +63,46 @@ def display_sim_data(position):
 
     colors = ['#000000', '#E69F00', '#CC79A7', '#009E73', '#0072B2', '#D55E00']
     marker_a = 'v'
-    marker_na = 'o'
+    marker_na = 'v'
 
-    plt.plot(tspan, sim[0]['pTyr_jnk3'] / jnk3_initial_value, color=colors[0])
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pTyr_arrestin_avg'].values[:-ignore],
+    fig1, ax1 = plt.subplots()
+    fig2, ax2 = plt.subplots()
+
+    ax1.plot(tspan, sim[0]['pTyr_jnk3'] / jnk3_initial_value, color=colors[3], label='p(Tyr)JNK3 sim')
+    ax1.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pTyr_arrestin_avg'].values[:-ignore],
                  exp_data['pTyr_arrestin_std'].values[:-ignore],
-                 linestyle='None', marker=marker_a, capsize=5, color=colors[0], label='p(Tyr)JNK3 exp')
-    plt.plot(tspan, sim[0]['pThr_jnk3'] / jnk3_initial_value, color=colors[1])
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pThr_arrestin_avg'].values[:-ignore],
+                 linestyle='None', marker=marker_a, capsize=5, color=colors[3], label='p(Tyr)JNK3 exp')
+    ax1.plot(tspan, sim[0]['pThr_jnk3'] / jnk3_initial_value, color=colors[4], label='p(Thr)JNK3 sim')
+    ax1.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pThr_arrestin_avg'].values[:-ignore],
                  exp_data['pThr_arrestin_std'].values[:-ignore],
-                 linestyle='None', marker=marker_a, capsize=5, color=colors[1], label='p(Thr)JNK3 exp')
-    plt.plot(tspan, sim[0]['all_jnk3'] / jnk3_initial_value, color=colors[2])
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['ppjnk3_arrestin_avg'].values[:-ignore],
+                 linestyle='None', marker=marker_a, capsize=5, color=colors[4], label='p(Thr)JNK3 exp')
+    ax1.plot(tspan, sim[0]['all_jnk3'] / jnk3_initial_value, color=colors[5], label='ppJNK3 sim')
+    ax1.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['ppjnk3_arrestin_avg'].values[:-ignore],
                  exp_data['ppjnk3_arrestin_std'].values[:-ignore],
-                 linestyle='None', marker=marker_a, capsize=5, color=colors[2], label='ppJNK3 exp')
+                 linestyle='None', marker=marker_a, capsize=5, color=colors[5], label='ppJNK3 exp')
 
-    plt.plot(tspan, sim[1]['pTyr_jnk3'] / jnk3_initial_value, color=colors[3])
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pTyr_noarrestin_avg'].values[:-ignore],
+    ax2.plot(tspan, sim[1]['pTyr_jnk3'] / jnk3_initial_value, color=colors[3], label='p(Tyr)JNK3 -Arr sim')
+    ax2.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pTyr_noarrestin_avg'].values[:-ignore],
                  exp_data['pTyr_noarrestin_std'].values[:-ignore],
                  linestyle='None', marker=marker_na, capsize=5, color=colors[3], label='p(Tyr)JNK3 -Arr exp')
-    plt.plot(tspan, sim[1]['pThr_jnk3'] / jnk3_initial_value, color=colors[4])
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pThr_noarrestin_avg'].values[:-ignore],
+    ax2.plot(tspan, sim[1]['pThr_jnk3'] / jnk3_initial_value, color=colors[4], label='p(Thr)JNK3 -Arr sim')
+    ax2.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pThr_noarrestin_avg'].values[:-ignore],
                  exp_data['pThr_noarrestin_std'].values[:-ignore],
                  linestyle='None', marker=marker_na, capsize=5, color=colors[4], label='p(Thr)JNK3 -Arr exp')
-    plt.plot(tspan, sim[1]['all_jnk3'] / jnk3_initial_value, color=colors[5])
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['ppjnk3_noarrestin_avg'].values[:-ignore],
+    ax2.plot(tspan, sim[1]['all_jnk3'] / jnk3_initial_value, color=colors[5], label='ppJNK3 -Arr sim')
+    ax2.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['ppjnk3_noarrestin_avg'].values[:-ignore],
                  exp_data['ppjnk3_noarrestin_std'].values[:-ignore],
                  linestyle='None', marker=marker_na, capsize=5, color=colors[5], label='ppJNK3 -Arr exp')
 
-    plt.xlabel('Time (s)')
-    plt.ylabel('Conc (microM)')
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig('calibrated_pydream_3.pdf', format='pdf', bbox_inches='tight')
-    plt.show()
+    ax1.set(xlabel='Time (s)', ylabel='Con (microM)', title='With Arrestin')
+    ax1.legend(ncol=2)
+    # fig1.tight_layout()
+    fig1.savefig('calibrated_pydream_arrestin2.pdf', format='pdf', bbox_inches='tight')
+
+    ax2.set(xlabel='Time (s)', ylabel='Con (microM)', title='W/O Arrestin')
+    # ax2.legend(ncol=2)
+    # fig1.tight_layout()
+    fig2.savefig('calibrated_pydream_noarrestin2.pdf', format='pdf', bbox_inches='tight')
 
 
 def display_data(data):
@@ -113,7 +119,7 @@ def display_data(data):
         plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pTyr_arrestin_avg'].values[:-ignore],
                      exp_data['pTyr_arrestin_std'].values[:-ignore],
                      linestyle=linestyle, marker=marker_a, markersize=markersize,
-                     capsize=5, color=colors[0], label='p(Tyr)JNK3 exp')
+                     capsize=5, color=colors[4], label='p(Tyr)JNK3 exp')
 
         plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pThr_arrestin_avg'].values[:-ignore],
                      exp_data['pThr_arrestin_std'].values[:-ignore],

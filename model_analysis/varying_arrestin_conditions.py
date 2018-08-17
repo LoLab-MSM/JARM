@@ -11,7 +11,7 @@ from equilibration_function import pre_equilibration
 idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-calibrated_pars = np.load('most_likely_par_100000_3.npy')
+calibrated_pars = np.load('most_likely_par_100000_2.npy')
 param_values = np.array([p.value for p in model.parameters])
 
 par_set_calibrated = np.copy(param_values)
@@ -51,5 +51,5 @@ plt.xlim(0, max_arrestin)
 plt.xlabel(r'Arrestin [$\mu$M]')
 plt.ylabel(r'doubly phosphorylated JNK3 [$\mu$M]')
 
-plt.savefig('varying_arrestin_3.pdf', format='pdf')
+plt.savefig('varying_arrestin_2.pdf', format='pdf')
 # plt.show()
