@@ -31,10 +31,8 @@ upper = xnominal + 2
 # lower[0] = xnominal[0] - np.log10(534)
 # upper[0] = xnominal[0] + np.log(534)
 
-ignore = 0
 
-tspan = np.linspace(0, exp_data['Time (secs)'].values[-(ignore+1)], 181)
-ignore = -len(exp_data['Time (secs)'].values)
+tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 181)
 t_exp_mask = [idx in exp_data['Time (secs)'].values[:] for idx in tspan]
 
 solver = ScipyOdeSimulator(model, tspan=tspan)
@@ -65,33 +63,33 @@ def display(position):
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
 
     plt.plot(tspan, sim[0]['pTyr_jnk3'] / jnk3_initial_value, color='red', label='p(Tyr)JNK3 sim')
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pTyr_arrestin_avg'].values[:-ignore],
-                 exp_data['pTyr_arrestin_std'].values[:-ignore],
+    plt.errorbar(exp_data['Time (secs)'].values, exp_data['pTyr_arrestin_avg'].values,
+                 exp_data['pTyr_arrestin_std'].values,
                  linestyle='None', marker='o', capsize=5, color='red', label='p(Tyr)JNK3 exp')
 
     plt.plot(tspan, sim[0]['pThr_jnk3'] / jnk3_initial_value, color='blue', label='p(Thr)JNK3 sim')
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pThr_arrestin_avg'].values[:-ignore],
-                 exp_data['pThr_arrestin_std'].values[:-ignore],
+    plt.errorbar(exp_data['Time (secs)'].values, exp_data['pThr_arrestin_avg'].values,
+                 exp_data['pThr_arrestin_std'].values,
                  linestyle='None', marker='o', capsize=5, color='blue', label='p(Thr)JNK3 exp')
 
     plt.plot(tspan, sim[0]['all_jnk3'] / jnk3_initial_value, color='cyan', label='ppJNK3 sim')
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['ppjnk3_arrestin_avg'].values[:-ignore],
-                 exp_data['ppjnk3_arrestin_std'].values[:-ignore],
+    plt.errorbar(exp_data['Time (secs)'].values, exp_data['ppjnk3_arrestin_avg'].values,
+                 exp_data['ppjnk3_arrestin_std'].values,
                  linestyle='None', marker='o', capsize=5, color='cyan', label='ppJNK3 exp')
 
     plt.plot(tspan, sim[1]['pTyr_jnk3'] / jnk3_initial_value, color='black', label='p(Tyr)JNK3 -Arr sim')
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pTyr_noarrestin_avg'].values[:-ignore],
-                 exp_data['pTyr_noarrestin_std'].values[:-ignore],
+    plt.errorbar(exp_data['Time (secs)'].values, exp_data['pTyr_noarrestin_avg'].values,
+                 exp_data['pTyr_noarrestin_std'].values,
                  linestyle='None', marker='o', capsize=5, color='black', label='p(Tyr)JNK3 -Arr exp')
 
     plt.plot(tspan, sim[1]['pThr_jnk3'] / jnk3_initial_value, color='green', label='p(Thr)JNK3 -Arr sim')
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['pThr_noarrestin_avg'].values[:-ignore],
-                 exp_data['pThr_noarrestin_std'].values[:-ignore],
+    plt.errorbar(exp_data['Time (secs)'].values, exp_data['pThr_noarrestin_avg'].values,
+                 exp_data['pThr_noarrestin_std'].values,
                  linestyle='None', marker='o', capsize=5, color='green', label='p(Thr)JNK3 -Arr exp')
 
     plt.plot(tspan, sim[1]['all_jnk3'] / jnk3_initial_value, color='purple', label='ppJNK3 -Arr sim')
-    plt.errorbar(exp_data['Time (secs)'].values[:-ignore], exp_data['ppjnk3_noarrestin_avg'].values[:-ignore],
-                 exp_data['ppjnk3_noarrestin_std'].values[:-ignore],
+    plt.errorbar(exp_data['Time (secs)'].values, exp_data['ppjnk3_noarrestin_avg'].values,
+                 exp_data['ppjnk3_noarrestin_std'].values,
                  linestyle='None', marker='o', capsize=5, color='purple', label='ppJNK3 -Arr exp')
 
     plt.xlabel('Arrestin (microM)')
@@ -125,20 +123,20 @@ def likelihood(position):
     pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
 
-    e_mkk4 = np.sum((exp_data['pTyr_arrestin_avg'].values[:-ignore] - sim[0]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pTyr_arrestin_std'].values[:-ignore])) / len(exp_data['pTyr_arrestin_std'].values[:-ignore])
-    e_mkk7 = np.sum((exp_data['pThr_arrestin_avg'].values[:-ignore] - sim[0]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pThr_arrestin_std'].values[:-ignore])) / len(exp_data['pThr_arrestin_std'].values[:-ignore])
-    # e_ppjnk3 = np.sum((exp_data['ppjnk3_arrestin_avg'].values[:ignore] - sim[0]['all_jnk3'][t_exp_mask] / jnk3_initial_value) **2 /
-    #                   (2 * exp_data['ppjnk3_arrestin_std'].values[:-ignore])) / len(exp_data['ppjnk3_arrestin_std'].values[:-ignore])
+    e_mkk4 = np.sum((exp_data['pTyr_arrestin_avg'].values - sim[0]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
+                    (2 * exp_data['pTyr_arrestin_std'].values)) / len(exp_data['pTyr_arrestin_std'].values)
+    e_mkk7 = np.sum((exp_data['pThr_arrestin_avg'].values - sim[0]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
+                    (2 * exp_data['pThr_arrestin_std'].values)) / len(exp_data['pThr_arrestin_std'].values)
+    # e_ppjnk3 = np.sum((exp_data['ppjnk3_arrestin_avg'].values - sim[0]['all_jnk3'][t_exp_mask] / jnk3_initial_value) **2 /
+    #                   (2 * exp_data['ppjnk3_arrestin_std'].values)) / len(exp_data['ppjnk3_arrestin_std'].values)
     error1 = e_mkk4 + e_mkk7
 
-    e2_mkk4 = np.sum((exp_data['pTyr_noarrestin_avg'].values[:-ignore] - sim[1]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pTyr_noarrestin_std'].values[:-ignore])) / len(exp_data['pTyr_noarrestin_std'].values[:-ignore])
-    e2_mkk7 = np.sum((exp_data['pThr_noarrestin_avg'].values[:-ignore] - sim[1]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pThr_noarrestin_std'].values[:-ignore])) / len(exp_data['pThr_noarrestin_std'].values[:-ignore])
-    # e2_ppjnk3 = np.sum((exp_data['ppjnk3_noarrestin_avg'].values[:ignore] - sim[1]['all_jnk3'][t_exp_mask] / jnk3_initial_value) **2 /
-    #                   (2 * exp_data['ppjnk3_noarrestin_std'].values[:-ignore])) / len(exp_data['ppjnk3_noarrestin_std'].values[:-ignore])
+    e2_mkk4 = np.sum((exp_data['pTyr_noarrestin_avg'].values - sim[1]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
+                    (2 * exp_data['pTyr_noarrestin_std'].values)) / len(exp_data['pTyr_noarrestin_std'].values)
+    e2_mkk7 = np.sum((exp_data['pThr_noarrestin_avg'].values - sim[1]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
+                    (2 * exp_data['pThr_noarrestin_std'].values)) / len(exp_data['pThr_noarrestin_std'].values)
+    # e2_ppjnk3 = np.sum((exp_data['ppjnk3_noarrestin_avg'].values - sim[1]['all_jnk3'][t_exp_mask] / jnk3_initial_value) **2 /
+    #                   (2 * exp_data['ppjnk3_noarrestin_std'].values)) / len(exp_data['ppjnk3_noarrestin_std'].values)
     error2 = e2_mkk4 + e2_mkk7
     error = error1 + error2
     return error,
