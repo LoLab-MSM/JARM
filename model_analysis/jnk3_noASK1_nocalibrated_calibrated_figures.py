@@ -16,7 +16,7 @@ idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
 # calibrated_pars = np.load('jnk3_noASK1_calibrated_pars_pso_1h.npy')
-calibrated_pars = np.load('most_likely_par_100000_2.npy') # most likely parameter from pydream calibration
+calibrated_pars = np.load('most_likely_par_100000.npy') # most likely parameter from pydream calibration
 param_values = np.array([p.value for p in model.parameters])
 
 jnk3_initial_idxs = [47, 48, 49]
@@ -166,7 +166,7 @@ def plot_arrestin_noarrestin_ppjnk3():
     plt.xlabel('Time (s)')
     plt.ylabel(r' Normalized Concentration')
     plt.legend()
-    plt.savefig('arrestin_noarrestin_ppjnk3_2.pdf', format='pdf', bbox_inches='tight')
+    plt.savefig('arrestin_noarrestin_ppjnk3.pdf', format='pdf', bbox_inches='tight')
 
 def plot_uujnk3_production():
     ## This function requires a model observables of the single phosphorylated jnk3 only upjnk3, pujnk3
@@ -243,7 +243,7 @@ def plot_uujnk3_production():
         f1 = sympy.lambdify(var_to_study, mon)
         mon_values = f1(*arg_f1)
         # print (label, mon_values)
-        axes[2].semilogy(tspan, mon_values, label=label, color=colors[counter])
+        axes[2].semilogy(tspan[1:], mon_values[1:], label=label, color=colors[counter])
         counter += 1
     axes[2].set_title('JNK3 second phosphorylation reactions')
     axes[2].set_ylabel(r'Rate [$\mu$M/s]', fontsize=12)
@@ -260,7 +260,7 @@ def plot_uujnk3_production():
     axes[2].legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
 
 
-    plt.savefig('ppjnk3_production_2.pdf', format='pdf', bbox_inches='tight')
+    plt.savefig('ppjnk3_production.pdf', format='pdf', bbox_inches='tight')
 
 
 
