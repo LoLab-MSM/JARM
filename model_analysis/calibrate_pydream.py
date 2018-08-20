@@ -10,7 +10,6 @@ from equilibration_function import pre_equilibration
 
 # Initialize PySB solver
 
-# exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv')
 exp_data = pd.read_csv('../data/exp_data_3min.csv')
 
 tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 181)

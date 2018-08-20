@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from equilibration_function import pre_equilibration
 
-# exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv') # [0,1] range normalization
 exp_data = pd.read_csv('../data/exp_data_3min.csv') # [0,1] range normalization
 
 

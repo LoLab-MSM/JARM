@@ -2,7 +2,6 @@
 from jnk3_no_ask1 import model
 import numpy as np
 from pysb.simulator import ScipyOdeSimulator
-import seaborn as sn
 import matplotlib.pyplot as plt
 from equilibration_function import pre_equilibration
 import sympy

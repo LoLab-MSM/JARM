@@ -20,7 +20,6 @@ rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.
 fitted_pars = np.load('most_likely_par_100000.npy')
 # param_values[rates_of_interest_mask] = 10 ** fitted_pars
 
-# exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv')
 exp_data = pd.read_csv('../data/exp_data_3min.csv')
 
 
