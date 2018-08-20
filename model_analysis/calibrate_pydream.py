@@ -13,16 +13,13 @@ from equilibration_function import pre_equilibration
 # exp_data = pd.read_csv('../../data/exp_data_arrestin_normalization_1h_138max.csv')
 exp_data = pd.read_csv('../data/exp_data_3min.csv')
 
-ignore = 0
-
-tspan = np.linspace(0, exp_data['Time (secs)'].values[-(ignore+1)], 181)
-ignore = -len(exp_data['Time (secs)'].values)
+tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 181)
 t_exp_mask = [idx in exp_data['Time (secs)'].values[:] for idx in tspan]
 
 solver = ScipyOdeSimulator(model, tspan=tspan)
 
-like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values[:-ignore],
-                                scale=exp_data['pTyr_arrestin_std'].values[:-ignore])
+like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values,
+                                scale=exp_data['pTyr_arrestin_std'].values)
 
 like_mkk7_arrestin_pjnk3_04 = halfnorm(loc=exp_data['pTyr_arrestin_avg'].values[:4],
 				scale=exp_data['pTyr_arrestin_std'].values[:4])
@@ -30,10 +27,10 @@ like_mkk7_arrestin_pjnk3_04 = halfnorm(loc=exp_data['pTyr_arrestin_avg'].values[
 like_mkk7_arrestin_pjnk3 = norm(loc=exp_data['pThr_arrestin_avg'].values[4:],
                                 scale=exp_data['pThr_arrestin_std'].values[4:])
 
-like_mkk4_noarrestin_pjnk3 = norm(loc=exp_data['pTyr_noarrestin_avg'].values[:-ignore],
-                                scale=exp_data['pTyr_noarrestin_std'].values[:-ignore])
-like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values[:-ignore],
-                                scale=exp_data['pThr_noarrestin_std'].values[:-ignore])
+like_mkk4_noarrestin_pjnk3 = norm(loc=exp_data['pTyr_noarrestin_avg'].values,
+                                scale=exp_data['pTyr_noarrestin_std'].values)
+like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values,
+                                scale=exp_data['pThr_noarrestin_std'].values)
 
 
 
@@ -51,7 +48,6 @@ arrestin_idx = [44]
 jnk3_initial_value = 0.6  # total jnk3
 jnk3_initial_idxs = [47, 48, 49]
 kcat_idx = [36, 37]
-
 
 param_values = np.array([p.value for p in model.parameters])
 
