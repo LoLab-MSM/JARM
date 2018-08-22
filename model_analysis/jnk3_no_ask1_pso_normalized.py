@@ -1,10 +1,10 @@
-from jnk3_no_ask1 import model
+from model_analysis.jnk3_no_ask1 import model
 from simplepso.pso import PSO
 from pysb.simulator import ScipyOdeSimulator
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from equilibration_function import pre_equilibration
+from model_analysis.equilibration_function import pre_equilibration
 
 exp_data = pd.read_csv('../data/exp_data_3min.csv') # [0,1] range normalization
 

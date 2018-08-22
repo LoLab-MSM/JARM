@@ -1,10 +1,12 @@
 # coding=utf-8
-from jnk3_no_ask1 import model
+from model_analysis.jnk3_no_ask1 import model
 import numpy as np
 from pysb.simulator import ScipyOdeSimulator
 import matplotlib.pyplot as plt
-from equilibration_function import pre_equilibration
-
+from model_analysis.equilibration_function import pre_equilibration
+plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=16)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=16)    # fontsize of the tick labels
 #New kds in jnk3 mkk4/7
 # idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream
 # idx_pars_calibrate = [5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream2
@@ -49,7 +51,7 @@ locs = np.append(locs, arrestin_initials[ppjnk3_max_idx])
 plt.xticks(locs.astype(int))
 plt.xlim(0, max_arrestin)
 plt.xlabel(r'Arrestin [$\mu$M]')
-plt.ylabel(r'doubly phosphorylated JNK3 [$\mu$M]')
+plt.ylabel(r'Activated JNK3 [$\mu$M]')
 
-plt.savefig('varying_arrestin.pdf', format='pdf')
+plt.savefig('varying_arrestin.pdf', format='pdf', bbox_inches='tight')
 # plt.show()

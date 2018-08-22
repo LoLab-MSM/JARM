@@ -1,12 +1,16 @@
 # coding=utf-8
-from jnk3_no_ask1 import model
+from model_analysis.jnk3_no_ask1 import model
 import numpy as np
 from pysb.simulator import ScipyOdeSimulator
 import matplotlib.pyplot as plt
-from equilibration_function import pre_equilibration
+from model_analysis.equilibration_function import pre_equilibration
 import sympy
 from collections import OrderedDict
 import pandas as pd
+
+plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=16)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=16)    # fontsize of the tick labels
 
 #New kds in jnk3 mkk4/7
 # idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream
@@ -177,13 +181,14 @@ def plot_uujnk3_production():
     tspan = np.linspace(0, 60, 100)
     sim2 = ScipyOdeSimulator(model, tspan, param_values=par_set_calibrated, initials=eq_conc1).run().all
 
-    fig, axes = plt.subplots(nrows=3, sharex=True, figsize=(6, 6))
+    fig, axes = plt.subplots(ncols=3, figsize=(15, 3))
     fig.subplots_adjust(hspace=0.5)
     axes[0].set_title('JNK3 activation')
     axes[0].plot(tspan, sim2['all_jnk3'], color="#999999", label='ppJNK3')
-    axes[0].plot(tspan, sim2['pThr_jnk3'] - sim2['__s4'], color="#E69F00", label='pThr-JNK3:Arrestin-3')
-    axes[0].plot(tspan, sim2['pTyr_jnk3'] - sim2['__s5'], color="#56B4E9", label='pTyr-JNK3:Arrestin-3')
+    axes[0].plot(tspan, sim2['pThr_jnk3'] - sim2['__s4'], color="#E69F00", label='pThr-JNK3:Arr-3')
+    axes[0].plot(tspan, sim2['pTyr_jnk3'] - sim2['__s5'], color="#56B4E9", label='pTyr-JNK3:Arr-3')
     axes[0].set_ylabel(r'Concentration [$\mu$M]', fontsize=12)
+    axes[0].set_xlabel('Time(s)', fontsize=14)
     # plt.xlim(0, tspan[-1])
 
 
@@ -224,7 +229,7 @@ def plot_uujnk3_production():
     # axes[1].legend(loc=0, ncol=2, frameon=False)
     axes[1].set_title('JNK3 first phosphorylation reactions')
     axes[1].set_ylabel(r'Rate [$\mu$M/s]', fontsize=12)
-    # axes[1].set_xlabel('Time(s)', fontsize=14)
+    axes[1].set_xlabel('Time(s)', fontsize=14)
     # plt.xlim(0, tspan[-1])
 
     counter = 0
@@ -255,7 +260,7 @@ def plot_uujnk3_production():
     axes[1].set_position([box1.x0, box1.y0, box1.width * 0.8, box1.height])
     axes[2].set_position([box2.x0, box2.y0, box2.width * 0.8, box2.height])
 
-    axes[0].legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+    axes[0].legend(loc='upper left', frameon=False)
     axes[2].legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
 
 

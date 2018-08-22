@@ -1,10 +1,10 @@
 # Importing libraries
-from jnk3_no_ask1 import model
+from model_analysis.jnk3_no_ask1 import model
 import numpy as np
 import matplotlib.pyplot as plt
 from pysb.simulator import ScipyOdeSimulator
 import pandas as pd
-from equilibration_function import pre_equilibration
+from model_analysis.equilibration_function import pre_equilibration
 import matplotlib
 plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=16)    # fontsize of the tick labels
