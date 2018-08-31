@@ -20,14 +20,13 @@ solver = ScipyOdeSimulator(model, tspan=tspan)
 like_mkk4_arrestin_pjnk3 = norm(loc=exp_data['pTyr_arrestin_avg'].values,
                                 scale=exp_data['pTyr_arrestin_std'].values)
 
-like_mkk7_arrestin_pjnk3_04 = halfnorm(loc=exp_data['pTyr_arrestin_avg'].values[:4],
-				scale=exp_data['pTyr_arrestin_std'].values[:4])
+like_mkk7_arrestin_pjnk3 = norm(loc=exp_data['pThr_arrestin_avg'].values,
+                                scale=exp_data['pThr_arrestin_std'].values)
 
-like_mkk7_arrestin_pjnk3 = norm(loc=exp_data['pThr_arrestin_avg'].values[4:],
-                                scale=exp_data['pThr_arrestin_std'].values[4:])
-
-like_mkk4_noarrestin_pjnk3 = norm(loc=exp_data['pTyr_noarrestin_avg'].values,
-                                scale=exp_data['pTyr_noarrestin_std'].values)
+like_mkk4_noarrestin_pjnk3 = norm(loc=exp_data['pTyr_noarrestin_avg'].values[4:],
+                                scale=exp_data['pTyr_noarrestin_std'].values[4:])
+like_mkk4_noarrestin_pjnk3_04 = halfnorm(loc=exp_data['pTyr_noarrestin_avg'].values[:4],
+                                       scale=exp_data['pTyr_noarrestin_std'].values[:4])
 like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values,
                                 scale=exp_data['pThr_noarrestin_std'].values)
 
@@ -72,7 +71,7 @@ def likelihood(position):
     pars_eq2 = np.copy(param_values)
 
     pars_eq2[arrestin_idx] = 0
-    pars_eq2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
+    pars_eq2[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
 
     all_pars = np.stack((pars_eq1, pars_eq2))
     all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
@@ -84,19 +83,20 @@ def likelihood(position):
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
     pars2[arrestin_idx] = 0
-    pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
+    pars2[jnk3_initial_idxs] = [0.592841488, 0, 0.007158512]
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
     logp_mkk4_arrestin = np.sum(like_mkk4_arrestin_pjnk3.logpdf(sim[0]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value))
-    logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim[0]['pThr_jnk3'][t_exp_mask][4:] / jnk3_initial_value))
-    logp_mkk7_arrestin_04 = np.sum(like_mkk7_arrestin_pjnk3_04.logpdf(sim[0]['pThr_jnk3'][t_exp_mask][:4] / jnk3_initial_value))
-    logp_mkk7_arrestin_total = logp_mkk7_arrestin + logp_mkk7_arrestin_04
+    logp_mkk7_arrestin = np.sum(like_mkk7_arrestin_pjnk3.logpdf(sim[0]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
+
     # No arrestin simulations/experiments
 
-    logp_mkk4_noarrestin = np.sum(like_mkk4_noarrestin_pjnk3.logpdf(sim[1]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value))
+    logp_mkk4_noarrestin = np.sum(like_mkk4_noarrestin_pjnk3.logpdf(sim[1]['pTyr_jnk3'][t_exp_mask][4:] / jnk3_initial_value))
+    logp_mkk4_noarrestin_04 = np.sum(like_mkk4_noarrestin_pjnk3_04.logpdf(sim[1]['pTyr_jnk3'][t_exp_mask][:4] / jnk3_initial_value))
     logp_mkk7_noarrestin = np.sum(like_mkk7_noarrestin_pjnk3.logpdf(sim[1]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
+    logp_mkk4_noarrestin_total = logp_mkk4_noarrestin + logp_mkk4_noarrestin_04
 
     #If model simulation failed due to integrator errors, return a log probability of -inf.
-    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin + logp_mkk7_noarrestin
+    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin_total + logp_mkk7_noarrestin
     if np.isnan(logp_total):
         logp_total = -np.inf
 
