@@ -15,7 +15,7 @@ chain4 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_4_100
 # chain9 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_9_300000.npy')
 
 total_iterations = chain0.shape[0]
-burnin = total_iterations / 2
+burnin = int(total_iterations / 2)
 samples = np.concatenate((chain0[burnin:, :], chain1[burnin:, :], chain2[burnin:, :],
                           chain3[burnin:, :], chain4[burnin:, :]
                           ))
@@ -33,7 +33,6 @@ f, axes = plt.subplots(rows, columns, figsize=(7, 7), sharex=True)
 for r in range(rows):
     for c in range(columns):
         weights = np.ones_like(samples[:, counter])/float(len(samples[:, counter]))
-        # sns.distplot(samples[:, counter], hist=True, color=colors[counter], norm_hist=True, ax=axes[r, c])
         axes[r, c].hist(samples[:, counter], bins=25, color=colors[counter], weights=weights)
         axes[r, c].set_title(model.parameters[idx_pars_calibrate[counter]].name, fontdict={'fontsize':8})
         # axes[r, c].set_xlim(-6, 6)
