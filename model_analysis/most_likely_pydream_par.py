@@ -12,7 +12,7 @@ chain4 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_4_100
 # chain9 = np.load('pydream_results/jnk3_dreamzs_5chain_sampled_params_chain_9_300000.npy')
 
 total_iterations = chain0.shape[0]
-burnin = total_iterations / 2
+burnin = int(total_iterations / 2)
 samples = np.concatenate((chain0[burnin:, :], chain1[burnin:, :], chain2[burnin:, :],
                           chain3[burnin:, :], chain4[burnin:, :]))
 
