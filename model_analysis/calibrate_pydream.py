@@ -4,9 +4,9 @@ from pysb.simulator import ScipyOdeSimulator
 from pydream.parameters import SampledParam
 from scipy.stats import norm, halfnorm, uniform
 from pydream.convergence import Gelman_Rubin
-from jnk3_no_ask1 import model
+from model_analysis.jnk3_no_ask1 import model
 import pandas as pd
-from equilibration_function import pre_equilibration
+from model_analysis.equilibration_function import pre_equilibration
 
 # Initialize PySB solver
 
@@ -30,7 +30,7 @@ like_mkk4_noarrestin_pjnk3_04 = halfnorm(loc=exp_data['pTyr_noarrestin_avg'].val
 like_mkk7_noarrestin_pjnk3 = norm(loc=exp_data['pThr_noarrestin_avg'].values,
                                 scale=exp_data['pThr_noarrestin_std'].values)
 
-
+like_thermobox = norm(loc=1, scale=1e-2)
 
 # Add PySB rate parameters to be sampled as unobserved random variables to DREAM with normal priors
 
@@ -49,14 +49,16 @@ kcat_idx = [36, 37]
 
 param_values = np.array([p.value for p in model.parameters])
 
-sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for par in param_values[rates_of_interest_mask]]
-# We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
-# for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
+sampled_parameter_names = [SampledParam(uniform, loc=np.log10(5E-8), scale=np.log10(1.9E3)-np.log10(5E-8))
+                           for pa in param_values[rates_of_interest_mask]]
+# sampled_parameter_names = [SampledParam(norm, loc=np.log10(par), scale=2) for par in param_values[rates_of_interest_mask]]
+# # We calibrate the pMKK4 - Arrestin-3 reverse reaction rate. We have experimental data
+# # for this interaction and know that the k_r varies from 160 to 1068 (standard deviation)
 sampled_parameter_names[0] = SampledParam(uniform, loc=np.log10(120), scale=np.log10(1200)-np.log10(120))
 sampled_parameter_names[6] = SampledParam(uniform, loc=np.log10(28), scale=np.log10(280)-np.log10(28))
 
 nchains = 5
-niterations = 300000
+niterations = 500000
 
 
 def likelihood(position):
@@ -95,26 +97,44 @@ def likelihood(position):
     logp_mkk7_noarrestin = np.sum(like_mkk7_noarrestin_pjnk3.logpdf(sim[1]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value))
     logp_mkk4_noarrestin_total = logp_mkk4_noarrestin + logp_mkk4_noarrestin_04
 
-    #If model simulation failed due to integrator errors, return a log probability of -inf.
-    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin_total + logp_mkk7_noarrestin
+    box1 = (pars1[21]/pars1[20]) * (pars1[23]/pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
+           (1 / (pars1[5]/pars1[4]))
+
+    box2 = (pars1[21] / pars1[20]) * (pars1[25] / pars1[24]) * (1 / (pars1[3] / pars1[2])) * \
+           (1 / (pars1[27] / pars1[26]))
+
+    box3 = (pars1[13] / pars1[12]) * (pars1[23] / pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
+           (1 / (pars1[15] / pars1[14]))
+
+    box4 = (pars1[7] / pars1[6]) * (pars1[25] / pars1[24]) * (1 / (pars1[3] / pars1[2])) * \
+           (1 / (pars1[11] / pars1[10]))
+
+    logp_box1 = like_thermobox.logpdf(box1)
+    logp_box2 = like_thermobox.logpdf(box2)
+    logp_box3 = like_thermobox.logpdf(box3)
+    logp_box4 = like_thermobox.logpdf(box4)
+
+    # If model simulation failed due to integrator errors, return a log probability of -inf.
+    logp_total = logp_mkk4_arrestin + logp_mkk7_arrestin + logp_mkk4_noarrestin_total + \
+                 logp_mkk7_noarrestin + logp_box1 + logp_box2 + logp_box3 + logp_box4
     if np.isnan(logp_total):
         logp_total = -np.inf
 
     return logp_total
 
-par1 = np.load('calibrated_pars_pso.npy')
-par2 = np.load('calibrated_pars_pso2.npy')
-par3 = np.load('calibrated_pars_pso3.npy')
-par4 = np.load('calibrated_pars_pso4.npy')
-par5 = np.load('calibrated_pars_pso5.npy')
-pso_pars = [par1, par2, par3, par4, par5]
+# par1 = np.load('pso_pars/calibrated_pars_pso.npy')
+# par2 = np.load('pso_pars/calibrated_pars_pso2.npy')
+# par3 = np.load('pso_pars/calibrated_pars_pso3.npy')
+# par4 = np.load('pso_pars/calibrated_pars_pso4.npy')
+# par5 = np.load('pso_pars/calibrated_pars_pso5.npy')
+# pso_pars = [par1, par2, par3, par4, par5]
 
 if __name__ == '__main__':
 
     # Run DREAM sampling.  Documentation of DREAM options is in Dream.py.
     converged = False
     total_iterations = niterations
-    sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood, start=pso_pars,
+    sampled_params, log_ps = run_dream(parameters=sampled_parameter_names, likelihood=likelihood,
                                        niterations=niterations, nchains=nchains, multitry=False,
                                        gamma_levels=4, adapt_gamma=True, history_thin=1,
                                        model_name='jnk3_dreamzs_5chain2', verbose=False)

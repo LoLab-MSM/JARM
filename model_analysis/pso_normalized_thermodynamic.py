@@ -45,7 +45,7 @@ def display(position):
     pars2 = np.copy(param_values)
 
     # Pre-equilibration
-    time_eq = np.linspace(0, 30, 30)
+    time_eq = np.linspace(0, 100, 100)
     pars_eq1 = np.copy(param_values)
     pars_eq2 = np.copy(param_values)
 
@@ -106,38 +106,57 @@ def likelihood(position):
     pars2 = np.copy(param_values)
 
     # Pre-equilibration
-    time_eq = np.linspace(0, 30, 60)
+    time_eq = np.linspace(0, 100, 100)
     pars_eq1 = np.copy(param_values)
     pars_eq2 = np.copy(param_values)
 
     pars_eq2[arrestin_idx] = 0
-    pars_eq2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
+    # pars_eq2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
 
     all_pars = np.stack((pars_eq1, pars_eq2))
     all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
-    eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
+    try:
+        eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
+    except:
+        return np.inf,
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
     pars2[arrestin_idx] = 0
-    pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
+    # pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
     sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
 
     e_mkk4 = np.sum((exp_data['pTyr_arrestin_avg'].values - sim[0]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pTyr_arrestin_std'].values)) / len(exp_data['pTyr_arrestin_std'].values)
+                    (exp_data['pTyr_arrestin_std'].values**2))
     e_mkk7 = np.sum((exp_data['pThr_arrestin_avg'].values - sim[0]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pThr_arrestin_std'].values)) / len(exp_data['pThr_arrestin_std'].values)
+                    (exp_data['pThr_arrestin_std'].values**2))
     # e_ppjnk3 = np.sum((exp_data['ppjnk3_arrestin_avg'].values - sim[0]['all_jnk3'][t_exp_mask] / jnk3_initial_value) **2 /
     #                   (2 * exp_data['ppjnk3_arrestin_std'].values)) / len(exp_data['ppjnk3_arrestin_std'].values)
     error1 = e_mkk4 + e_mkk7
 
     e2_mkk4 = np.sum((exp_data['pTyr_noarrestin_avg'].values - sim[1]['pTyr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pTyr_noarrestin_std'].values)) / len(exp_data['pTyr_noarrestin_std'].values)
+                     (exp_data['pTyr_noarrestin_std'].values**2))
     e2_mkk7 = np.sum((exp_data['pThr_noarrestin_avg'].values - sim[1]['pThr_jnk3'][t_exp_mask] / jnk3_initial_value) ** 2 /
-                    (2 * exp_data['pThr_noarrestin_std'].values)) / len(exp_data['pThr_noarrestin_std'].values)
+                     (exp_data['pThr_noarrestin_std'].values**2))
     # e2_ppjnk3 = np.sum((exp_data['ppjnk3_noarrestin_avg'].values - sim[1]['all_jnk3'][t_exp_mask] / jnk3_initial_value) **2 /
     #                   (2 * exp_data['ppjnk3_noarrestin_std'].values)) / len(exp_data['ppjnk3_noarrestin_std'].values)
+
+    box1 = (pars1[21]/pars1[20]) * (pars1[23]/pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
+           (1 / (pars1[5]/pars1[4]))
+
+    box2 = (pars1[21] / pars1[20]) * (pars1[25] / pars1[24]) * (1 / (pars1[3] / pars1[2])) * \
+           (1 / (pars1[27] / pars1[26]))
+
+    box3 = (pars1[13] / pars1[12]) * (pars1[23] / pars1[22]) * (1 / (pars1[1] / pars1[0])) * \
+           (1 / (pars1[15] / pars1[14]))
+
+    box4 = (pars1[7] / pars1[6]) * (pars1[25] / pars1[24]) * (1 / (pars1[3] / pars1[2])) * \
+           (1 / (pars1[11] / pars1[10]))
+
+    boxes = np.array([box1, box2, box3, box4])
+    boxes_error = np.sum((boxes - 1)**2)
+
     error2 = e2_mkk4 + e2_mkk7
-    error = error1 + error2
+    error = error1 + error2 + boxes_error
     return error,
 
 # new_nominal = np.load('jnk3_noASK1_calibrated_pars_pso_2min_5.npy')
@@ -148,7 +167,7 @@ def run_example():
     pso.set_start_position(xnominal)
     pso.set_bounds(lower=lower, upper=upper)
     pso.set_speed(-.25, .25)
-    pso.run(25, 100)
+    pso.run(40, 200)
     display(pso.best)
     np.save('calibrated_pars_pso5', pso.best)
 
