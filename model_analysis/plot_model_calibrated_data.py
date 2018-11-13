@@ -5,20 +5,17 @@ import matplotlib.pyplot as plt
 from pysb.simulator import ScipyOdeSimulator
 import pandas as pd
 from model_analysis.equilibration_function import pre_equilibration
-import matplotlib
-plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=16)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=16)    # fontsize of the tick labels
+
+plt.rc('axes', labelsize=22)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=20)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=20)    # fontsize of the tick labels
 
 # Loading fitted parameters
 param_values = np.array([p.value for p in model.parameters])
-# idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream
-# idx_pars_calibrate = [5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream2
 idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-fitted_pars = np.load('most_likely_par_100000.npy')
-# param_values[rates_of_interest_mask] = 10 ** fitted_pars
+fitted_pars = np.load('most_likely_par_500000_4box.npy')
 
 exp_data = pd.read_csv('../data/exp_data_3min.csv')
 
@@ -29,7 +26,7 @@ jnk3_initial_value = 0.6  # total jnk3
 jnk3_initial_idxs = [47, 48, 49]
 kcat_idx = [36, 37]
 
-tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 121)
+tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 181)
 t_exp_mask = [idx in exp_data['Time (secs)'].values[:] for idx in tspan]
 solver = ScipyOdeSimulator(model, tspan=tspan)
 
@@ -72,7 +69,7 @@ def display_sim_data(position):
     ax1.plot(tspan, sim[0]['pThr_jnk3'] / jnk3_initial_value, color=colors[4], label='p(Thr)JNK3 sim')
     ax1.errorbar(exp_data['Time (secs)'].values, exp_data['pThr_arrestin_avg'].values,
                  exp_data['pThr_arrestin_std'].values,
-                 linestyle='None', marker=marker_a, capsize=5, color=colors[4], label='New p(Thr)JNK3 exp')
+                 linestyle='None', marker=marker_a, capsize=5, color=colors[4], label='p(Thr)JNK3 exp')
     ax1.plot(tspan, sim[0]['all_jnk3'] / jnk3_initial_value, color=colors[5], label='ppJNK3 sim')
     ax1.errorbar(exp_data['Time (secs)'].values, exp_data['ppjnk3_arrestin_avg'].values,
                  exp_data['ppjnk3_arrestin_std'].values,
@@ -92,7 +89,7 @@ def display_sim_data(position):
                  linestyle='None', marker=marker_na, capsize=5, color=colors[5], label='ppJNK3 -Arr exp')
 
     #### Code to plot old calibration ####
-    # pars_old = np.load('most_likely_par_100000_3.npy')
+    # pars_old = np.load('old_bad_fit_most_likely_par.npy')
     # param_values[rates_of_interest_mask] = 10 ** pars_old
     # param_values[jnk3_initial_idxs] = [0.43398, 0.162, 0.00402]
     # pars_eq_old = np.copy(param_values)
@@ -102,17 +99,30 @@ def display_sim_data(position):
     #
     # old_thr_avg = [0.271008408, 0.389166612, 1, 1, 1, 1, 1, 1, 1]
     # old_thr_std = [0.137960707, 0.091614886, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    # ax1.errorbar(exp_data['Time (secs)'].values, old_thr_avg, old_thr_std,
-    #              linestyle='None', marker=marker_a, capsize=5, color='gray', label='Old p(Thr)JNK3 exp')
+    # # ax1.errorbar(exp_data['Time (secs)'].values, old_thr_avg, old_thr_std,
+    # #              linestyle='None', marker=marker_a, capsize=5, color='gray', label='Old p(Thr)JNK3 exp')
     #
     # ax1.plot(tspan, sim_old['pThr_jnk3'] / jnk3_initial_value, color='gray', label='Old p(Thr)JNK3 sim')
+    ####
 
-    ax1.set(xlabel='Time (s)', ylabel='Con (microM)', title='With Arrestin')
-    ax1.legend(ncol=2)
+    ######## Plotting legend separately
+    # handles, labels = ax1.get_legend_handles_labels()
+    # fig_legend = plt.figure(figsize=(30, 2))
+    # axi = fig_legend.add_subplot(111)
+    # fig_legend.legend(handles, labels, ncol=6, loc='center', scatterpoints=1, fontsize=20)
+    # axi.xaxis.set_visible(False)
+    # axi.yaxis.set_visible(False)
+    # for item in [fig_legend, axi]:
+    #     item.patch.set_visible(False)
+    # fig_legend.canvas.draw()
+    # fig_legend.savefig('legends.pdf', transparent=True)
+
+    ax1.set(xlabel='Time (s)', ylabel='Con (microM)')
+    # ax1.legend(ncol=1, fontsize=13.5)
     # fig1.tight_layout()
     fig1.savefig('calibrated_pydream_arrestin.pdf', format='pdf', bbox_inches='tight')
 
-    ax2.set(xlabel='Time (s)', ylabel='Con (microM)', title='W/O Arrestin')
+    ax2.set(xlabel='Time (s)', ylabel='Con (microM)')
     # ax2.legend(ncol=2)
     # fig1.tight_layout()
     fig2.savefig('calibrated_pydream_noarrestin.pdf', format='pdf', bbox_inches='tight')
@@ -168,5 +178,5 @@ def display_data(data):
     plt.show()
 
 
-display_sim_data(fitted_pars)
-# display_data(data='both')
+# display_sim_data(fitted_pars)
+display_data(data='both')
