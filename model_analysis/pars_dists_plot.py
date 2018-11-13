@@ -9,12 +9,10 @@ chain2 = np.load('pydream_results_4box/jnk3_dreamzs_5chain_sampled_params_chain_
 chain3 = np.load('pydream_results_4box/jnk3_dreamzs_5chain_sampled_params_chain_3_500000.npy')
 chain4 = np.load('pydream_results_4box/jnk3_dreamzs_5chain_sampled_params_chain_4_500000.npy')
 
-
 total_iterations = chain0.shape[0]
 burnin = int(total_iterations / 2)
 samples = np.concatenate((chain0[burnin:, :], chain1[burnin:, :], chain2[burnin:, :],
-                          chain3[burnin:, :], chain4[burnin:, :]
-                          ))
+                          chain3[burnin:, :], chain4[burnin:, :]))
 
 idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 
