@@ -1,8 +1,8 @@
-from jnk3_no_ask1 import model
+from model_analysis.jnk3_no_ask1 import model
 import numpy as np
 import matplotlib.pyplot as plt
 from pysb.simulator import ScipyOdeSimulator
-from equilibration_function import pre_equilibration
+from model_analysis.equilibration_function import pre_equilibration
 
 param_values = np.array([p.value for p in model.parameters])
 #New kds in jnk3 mkk4/7
