@@ -12,14 +12,11 @@ plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=16)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=16)    # fontsize of the tick labels
 
-#New kds in jnk3 mkk4/7
-# idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream
-# idx_pars_calibrate = [5, 9, 11, 15, 17, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream2
 idx_pars_calibrate = [1, 5, 9, 11, 15, 17, 19, 23, 25, 27, 31, 35, 36, 37, 38, 39, 41, 43] #pydream3
 rates_of_interest_mask = [i in idx_pars_calibrate for i, par in enumerate(model.parameters)]
 
-# calibrated_pars = np.load('jnk3_noASK1_calibrated_pars_pso_1h.npy')
-calibrated_pars = np.load('most_likely_par_100000.npy') # most likely parameter from pydream calibration
+calibrated_pars = np.load('most_likely_par_500000_4box.npy')
+# calibrated_pars = np.load('calibrated_pars_pso1.npy') # most likely parameter from pydream calibration
 param_values = np.array([p.value for p in model.parameters])
 
 jnk3_initial_idxs = [47, 48, 49]
@@ -28,138 +25,38 @@ kcat_idx = [36, 37]
 
 par_set_calibrated = np.copy(param_values)
 par_set_calibrated[rates_of_interest_mask] = 10 ** calibrated_pars
-
-
-def plot_trajectories_nocalibrated_model():
-    # Pre-equilibration
-    time_eq = np.linspace(0, 30, 30)
-    pars_eq_nc = np.array([par.value for par in model.parameters])
-    pars_eq_nc[[24, 25]] = 0  # Setting catalytic reactions to zero for pre-equilibration
-    eq_conc_nc = pre_equilibration(model, time_eq, pars_eq_nc)[1]
-
-    tspan = np.linspace(0, 60, 100)
-    sim1 = ScipyOdeSimulator(model, tspan, initials=eq_conc_nc).run().all
-
-    linestyle = 'dashed'
-    size = 8
-    loc = (1.01, 0.8)
-    frameon = False
-    # Two subplots, the axes array is 1-d
-    f, axarr = plt.subplots(2, sharex=True)
-    # axarr[0].set_title('Sharing X axis')
-    axarr[0].plot(tspan, sim1['__s18'], linestyle=linestyle, color='#0072B2', label='Arrestin-3:MKK4:p(Tyr)JNK3')
-    axarr[0].plot(tspan, sim1['__s21'], color='#0072B2', label='Arrestin-3:MKK7:p(Thr)JNK3')
-    axarr[0].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-
-    # axarr[2].plot(tspan, sim2['pTyr_jnk3'], linestyle=linestyle, color='#D55E00')
-    # axarr[2].plot(tspan, sim2['pThr_jnk3'], color='#D55E00')
-
-    axarr[1].plot(tspan, sim1['__s19'], linestyle=linestyle, color='#CC79A7', label='Arrestin-3:MKK4:p(Thr)JNK3')
-    axarr[1].plot(tspan, sim1['__s22'], color='#CC79A7', label='Arrestin-3:MKK7:p(Tyr)JNK3')
-    axarr[1].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-    axarr[1].set_xlabel('Time (s)')
-    f.text(0.01, 0.5, r'Concentration [$\mu$M]', ha='center', va='center', rotation='vertical')
-    # plt.tight_layout(rect=[0, 0, 0.75, 1])
-    plt.subplots_adjust(right=0.7)
-    plt.savefig('model_no_calibrated_trajectories.pdf', format='pdf', bbox_inches="tight")
-
-
-def plot_trajectories_calibrated_model():
-    # Pre-equilibration
-    time_eq = np.linspace(0, 30, 30)
-    pars_eq = np.copy(par_set_calibrated)
-    pars_eq[[24, 25]] = 0  # Setting catalytic reactions to zero for pre-equilibration
-    eq_conc1 = pre_equilibration(model, time_eq, pars_eq)[1]
-    tspan = np.linspace(0, 60, 100)
-    sim2 = ScipyOdeSimulator(model, tspan, param_values=par_set_calibrated, initials=eq_conc1).run().all
-
-    linestyle = 'dashed'
-    size = 8
-    loc = (1.01, 0)
-    frameon = False
-    # Two subplots, the axes array is 1-d
-    f, axarr = plt.subplots(7, sharex=True)
-    axarr[0].plot(tspan, sim2['__s6'], linestyle=linestyle, color='#E69F00', label="Arrestin-3:MKK4")
-    axarr[0].plot(tspan, sim2['__s7'], color='#E69F00', label="Arrestin-3:MKK7")
-    axarr[0].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-    # axarr[0].set_title('Sharing X axis')
-    axarr[1].plot(tspan, sim2['__s18'], linestyle=linestyle, color='#0072B2', label='Arrestin-3:MKK4:p(Tyr)JNK3')
-    axarr[1].plot(tspan, sim2['__s21'], color='#0072B2', label='Arrestin-3:MKK7:p(Thr)JNK3')
-    axarr[1].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-
-    # axarr[2].plot(tspan, sim2['pTyr_jnk3'], linestyle=linestyle, color='#D55E00')
-    # axarr[2].plot(tspan, sim2['pThr_jnk3'], color='#D55E00')
-
-    axarr[2].plot(tspan, sim2['__s19'], linestyle=linestyle, color='#CC79A7', label='Arrestin-3:MKK4:p(Thr)JNK3')
-    axarr[2].plot(tspan, sim2['__s22'], color='#CC79A7', label='Arrestin-3:MKK7:p(Tyr)JNK3')
-    axarr[2].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-    # axarr[3].plot(tspan, sim1['__s19'], linestyle=linestyle, color='#000000')
-    # axarr[3].plot(tspan, sim1['__s20'], color='#000000')
-    axarr[3].plot(tspan, sim2['__s25'], linestyle=linestyle, color='#009E73', label='Arrestin-3:MKK4:p(Tyr-Thr)JNK3')
-    axarr[3].plot(tspan, sim2['__s26'], color='#009E73', label='Arrestin-3:MKK7:p(Tyr-Thr)JNK3')
-    axarr[3].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-
-    axarr[4].plot(tspan, sim2['__s13'], linestyle=linestyle, color='#F0E442', label='MKK4:p(Tyr)JNK3')
-    axarr[4].plot(tspan, sim2['__s16'], color='#F0E442', label='MKK7:p(Thr)JNK3')
-    axarr[4].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-
-    axarr[5].plot(tspan, sim2['__s12'], linestyle=linestyle, color='#D55E00', label='MKK4:p(Thr)JNK3')
-    axarr[5].plot(tspan, sim2['__s15'], color='#D55E00', label='MKK7:(Tyr)JNK3')
-    axarr[5].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-
-    axarr[6].plot(tspan, sim2['__s23'], linestyle=linestyle, color='#56B4E9', label='MKK4:p(Tyr-Thr)JNK3')
-    axarr[6].plot(tspan, sim2['__s24'], color='#56B4E9', label='MKK7:p(Tyr-Thr)JNK3')
-    axarr[6].legend(frameon=frameon, loc=loc, prop={'size': size}).get_frame().set_alpha(1)
-
-    axarr[6].set_xlabel('Time (s)')
-    f.text(0.01, 0.5, r'Concentration [$\mu$M]', ha='center', va='center', rotation='vertical')
-    # plt.tight_layout(rect=[0, 0, 0.75, 1])
-    plt.subplots_adjust(right=0.7)
-    plt.subplots_adjust(hspace=0.4)
-
-    axarr[0].tick_params(axis='y', which='major', labelsize=8)
-    axarr[1].tick_params(axis='y', which='major', labelsize=8)
-    axarr[2].tick_params(axis='y', which='major', labelsize=8)
-    axarr[3].tick_params(axis='y', which='major', labelsize=8)
-    axarr[4].tick_params(axis='y', which='major', labelsize=8)
-    axarr[5].tick_params(axis='y', which='major', labelsize=8)
-    axarr[6].tick_params(axis='y', which='major', labelsize=8)
-    # axarr[1].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-    # axarr[2].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-    # axarr[3].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-    # axarr[4].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-    # axarr[5].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-    # axarr[6].ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-
-    plt.savefig('model_trajectories_calibrated.pdf', format='pdf', bbox_inches='tight')
+# par_set_calibrated = calibrated_pars[0]
 
 
 def plot_arrestin_noarrestin_ppjnk3():
+    """
+    Plot ppJNK3 activation with and withou arrestin
+    Returns
+    -------
+
+    """
     # Pre-equilibration
     exp_data = pd.read_csv('../data/exp_data_3min.csv')
-    tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 121)
+    tspan = np.linspace(0, exp_data['Time (secs)'].values[-1], 181)
     solver = ScipyOdeSimulator(model, tspan=tspan)
 
-    pars1 = np.copy(par_set_calibrated)
-    pars2 = np.copy(par_set_calibrated)
+    pars_arr = np.copy(par_set_calibrated)
+    pars_noarr = np.copy(par_set_calibrated)
 
     # Pre-equilibration
     time_eq = np.linspace(0, 100, 100)
-    pars_eq1 = np.copy(par_set_calibrated)
-    pars_eq2 = np.copy(par_set_calibrated)
+    pars_arr_eq = np.copy(par_set_calibrated)
+    pars_noarr_eq = np.copy(par_set_calibrated)
 
-    pars_eq2[arrestin_idx] = 0
-    pars_eq2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
+    pars_noarr_eq[arrestin_idx] = 0
+    pars_noarr_eq[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
 
-    all_pars = np.stack((pars_eq1, pars_eq2))
+    all_pars = np.stack((pars_arr_eq, pars_noarr_eq))
     all_pars[:, kcat_idx] = 0  # Setting catalytic reactions to zero for pre-equilibration
     eq_conc = pre_equilibration(model, time_eq, all_pars)[1]
 
     # Simulating models with initials from pre-equilibration and parameters for condition with/without arrestin
-    pars2[arrestin_idx] = 0
-    pars2[jnk3_initial_idxs] = [0.5958, 0, 0.0042]
-    sim = solver.run(param_values=[pars1, pars2], initials=eq_conc).all
-
+    sim = solver.run(param_values=[pars_arr, pars_noarr], initials=eq_conc).all
 
     print ((sim[0]['all_jnk3'][-1] ) / (sim[1]['all_jnk3'][-1] ))
     print (sim[0]['all_jnk3'][-1] , sim[1]['all_jnk3'][-1] )
@@ -171,14 +68,20 @@ def plot_arrestin_noarrestin_ppjnk3():
     plt.legend()
     plt.savefig('arrestin_noarrestin_ppjnk3.pdf', format='pdf', bbox_inches='tight')
 
-def plot_uujnk3_production():
-    ## This function requires a model observables of the single phosphorylated jnk3 only upjnk3, pujnk3
+
+def plot_ppjnk3_production():
+    """
+    Plot ppJNK3 first and second phosphorylation
+    Returns
+    -------
+
+    """
     # Pre-equilibration
     time_eq = np.linspace(0, 100, 100)
     pars_eq = np.copy(par_set_calibrated)
     pars_eq[[36, 37]] = 0  # Setting catalytic reactions to zero for pre-equilibration
     eq_conc1 = pre_equilibration(model, time_eq, pars_eq)[1]
-    tspan = np.linspace(0, 60, 100)
+    tspan = np.linspace(0, 180, 181)
     sim2 = ScipyOdeSimulator(model, tspan, param_values=par_set_calibrated, initials=eq_conc1).run().all
 
     fig, axes = plt.subplots(ncols=3, figsize=(15, 3))
@@ -190,7 +93,6 @@ def plot_uujnk3_production():
     axes[0].set_ylabel(r'Concentration [$\mu$M]', fontsize=12)
     axes[0].set_xlabel('Time(s)', fontsize=14)
     # plt.xlim(0, tspan[-1])
-
 
     par_name_idx = {j.name: i for i, j in enumerate(model.parameters)}
 
@@ -224,6 +126,7 @@ def plot_uujnk3_production():
         f1 = sympy.lambdify(var_to_study, mon)
         mon_values = f1(*arg_f1)
         # print (label, mon_values)
+        print(np.log10(mon_values))
         axes[1].semilogy(tspan, mon_values, label=label, color=colors[counter])
         counter += 1
     # axes[1].legend(loc=0, ncol=2, frameon=False)
@@ -260,15 +163,11 @@ def plot_uujnk3_production():
     axes[1].set_position([box1.x0, box1.y0, box1.width * 0.8, box1.height])
     axes[2].set_position([box2.x0, box2.y0, box2.width * 0.8, box2.height])
 
-    axes[0].legend(loc='upper left', frameon=False)
+    axes[0].legend(loc='lower right', frameon=False)
     axes[2].legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
-
 
     plt.savefig('ppjnk3_production.pdf', format='pdf', bbox_inches='tight')
 
 
-
-# plot_trajectories_calibrated_model()
-# plot_trajectories_nocalibrated_model()
-plot_arrestin_noarrestin_ppjnk3()
-# plot_uujnk3_production()
+# plot_arrestin_noarrestin_ppjnk3()
+plot_ppjnk3_production()
